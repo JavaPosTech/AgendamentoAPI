@@ -1,0 +1,45 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:18
+    ports:
+      - "8745:5432"
+
+    environment:
+      TZ: GMT-3
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+    restart: always
+
+  restauranteapi:
+    container_name: RestauranteAPI
+    build: .
+    image: restauranteapi:1.0.0
+    depends_on:
+      - postgres
+
+    ports:
+      - "9027:9027"
+
+    environment:
+      TZ: GMT-3
+      SPRING_PROFILES_ACTIVE: prod
+
+      DATABASE_IP: postgres
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+
+    volumes:
+      - ./logs:/app/logs
+
+    restart: always
+
+volumes:
+  postgres_data:
