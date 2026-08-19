@@ -4,10 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AgendamentoApiApplication {
+public class AgendamentoAPIApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AgendamentoApiApplication.class, args);
+		SpringApplication.run(AgendamentoAPIApplication.class, args);
 	}
-
 }

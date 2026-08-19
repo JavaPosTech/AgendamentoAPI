@@ -16,10 +16,10 @@ services:
 
     restart: always
 
-  restauranteapi:
-    container_name: RestauranteAPI
+  agendamentoapi:
+    container_name: AgendamentoAPI
     build: .
-    image: restauranteapi:1.0.0
+    image: agendamentoapi:1.0.0
     depends_on:
       - postgres
 

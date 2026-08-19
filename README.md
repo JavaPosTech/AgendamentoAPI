@@ -5,7 +5,7 @@
 <br> 
 
 <div align="center">
-  Turma 12ADJT – Projeto desenvolvido na pós-graduação em Arquitetura e Desenvolvimento em Java da FIAP. O objetivo deste projeto é criar um sistema robusto que permita aos restaurantes gerenciar suas operações de forma eficiente, enquanto os clientes poderão consultar informações, deixar avaliações e realizar pedidos online.
+    Turma 12ADJT – Projeto desenvolvido na pós-graduação em Arquitetura e Desenvolvimento em Java da FIAP. O objetivo é desenvolver um sistema hospitalar baseado em microsserviços, com serviços independentes para o gerenciamento de agendamentos e envio de notificações, utilizando Spring Security para autenticação e autorização e comunicação assíncrona entre os serviços.
 </div> 
 
  <br> <br> 
@@ -52,7 +52,7 @@ Em seguida, execute a aplicação utilizando a opção `BootRun - DEV`. Dessa fo
 
 ## 🚀 Produção
 
-Para execução em ambiente de produção, o projeto disponibiliza o arquivo `docker-compose-restauranteapi.yml`. Antes de iniciar a aplicação, é necessário configurar o arquivo `.env` com as variáveis de conexão do banco de dados, conforme o ambiente desejado:
+Para execução em ambiente de produção, o projeto disponibiliza o arquivo `docker-compose-agendamentoapi.yml`. Antes de iniciar a aplicação, é necessário configurar o arquivo `.env` com as variáveis de conexão do banco de dados, conforme o ambiente desejado:
 
 ```bash
 # DATABASE_PORT
@@ -69,7 +69,7 @@ $ Exemplo: postgres@2026
 ```
 
 > ℹ️ Importante: a variável `DATABASE_PORT` representa a porta utilizada pela aplicação para se conectar ao banco de dados dentro da rede interna do Docker.
-O valor padrão é `5432`. Caso deseje alterar essa porta no arquivo  `.env`, também será necessário ajustar o arquivo `docker-compose-restauranteapi.yml`, atualizando a porta interna do container PostgreSQL para o mesmo valor configurado.
+O valor padrão é `5432`. Caso deseje alterar essa porta no arquivo  `.env`, também será necessário ajustar o arquivo `docker-compose-agendamentoapi.yml`, atualizando a porta interna do container PostgreSQL para o mesmo valor configurado.
 
 ```yaml
 ports:
@@ -93,7 +93,7 @@ Nesse exemplo:
 Após configurar o arquivo `.env` com as variáveis de conexão do banco de dados, execute no terminal:
 
 ```bash
-docker compose -f docker-compose-restauranteapi.yml up -d
+docker compose -f docker-compose-agendamentoapi.yml up -d
 ```
 
 Dessa forma, a API será iniciada utilizando as variáveis definidas no arquivo `.env` e ficará disponível na porta `9027`.
@@ -108,7 +108,7 @@ Para acessar a documentação da API, inicie a aplicação utilizando a opção 
 
 ```bash
 # URL para acessar a documentação da API 
-$ http://localhost:9017/RestauranteAPI/swagger-ui/index.html
+$ http://localhost:9017/agendamentoapi/swagger-ui/index.html
 ```
 
 <br> 
@@ -117,7 +117,7 @@ Caso inicie a aplicação utilizando a opção `BootRun - PROD` e acesse o link 
 
 ```bash
 # URL para acessar a documentação da API 
-$ http://localhost:9027/RestauranteAPI/swagger-ui/index.html
+$ http://localhost:9027/agendamentoapi/swagger-ui/index.html
 ```
 
 <br> 
