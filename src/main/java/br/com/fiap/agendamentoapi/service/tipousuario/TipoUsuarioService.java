@@ -17,9 +17,9 @@ public class TipoUsuarioService {
 
     @Transactional(readOnly = true)
     public TipoUsuario buscarPorId(Integer id) {
-        log.info("Buscando Tipo de Usuário com ID: [{}]", id);
+        log.info("Buscando Tipo Usuário com ID: [{}]", id);
 
         return tipoUsuarioRepository.findById(id)
-                .orElseThrow(() -> new TipoUsuarioNaoEncontradoException("Tipo de Usuário não encontrado!"));
+                .orElseThrow(() -> new TipoUsuarioNaoEncontradoException("Tipo Usuário não encontrado!"));
     }
 }

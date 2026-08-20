@@ -26,21 +26,21 @@ class PacienteControllerTest extends AbstractControllerTest {
 
     @Test
     void getPacientesTest() throws Exception {
-        testGet("/v1/pacientes");
+        testGet("/v1/paciente");
     }
 
     @Test
     void criarPacientesTest() throws Exception {
-        testPost("/v1/pacientes", criarPacienteRequest);
+        testPost("/v1/paciente", criarPacienteRequest);
     }
 
     @Test
     void atualizarTest() throws Exception {
-        testPatch("/v1/pacientes/1", atualizarPacienteRequest);
+        testPatch("/v1/paciente/1", atualizarPacienteRequest);
     }
 
     @Test
     void deletarTest() throws Exception {
-        testDelete("/v1/pacientes/1");
+        testDelete("/v1/paciente/1");
     }
 }

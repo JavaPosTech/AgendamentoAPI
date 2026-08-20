@@ -1,14 +1,15 @@
-package br.com.fiap.agendamentoapi.service;
+package br.com.fiap.agendamentoapi.service.paciente;
 
 import br.com.fiap.agendamentoapi.config.AbstractTest;
+import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.model.request.AtualizarPacienteRequest;
 import br.com.fiap.agendamentoapi.model.request.CriarPacienteRequest;
-import br.com.fiap.agendamentoapi.service.paciente.PacienteService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
@@ -25,13 +26,14 @@ class PacienteServiceTest extends AbstractTest {
     }
 
     @Test
+    @Transactional
     void salvarTest() {
         Assertions.assertDoesNotThrow(() -> pacienteService.salvar(new CriarPacienteRequest(
                 "Teste",
                 "123456",
                 "Teste",
                 "Teste",
-                "12345678901",
+                "12908734011",
                 "Teste",
                 LocalDate.now())
         ));
@@ -49,7 +51,23 @@ class PacienteServiceTest extends AbstractTest {
     }
 
     @Test
+    void atualizarTestWithException() {
+        Assertions.assertThrows(UsuarioNaoEncontradoException.class, () -> pacienteService.atualizar(Integer.MAX_VALUE, new AtualizarPacienteRequest(
+                "Nome Atualizado",
+                "Sobrenome Atualizado",
+                "0987654321",
+                "Teste Atualizado",
+                LocalDate.now())
+        ));
+    }
+
+    @Test
     void deletarTest() {
         Assertions.assertDoesNotThrow(() -> pacienteService.deletar(1));
+    }
+
+    @Test
+    void deletarTestWithException() {
+        Assertions.assertThrows(UsuarioNaoEncontradoException.class, () -> pacienteService.deletar(Integer.MAX_VALUE));
     }
 }

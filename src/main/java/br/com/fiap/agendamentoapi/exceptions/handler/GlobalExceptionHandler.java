@@ -1,6 +1,7 @@
 package br.com.fiap.agendamentoapi.exceptions.handler;
 
 import br.com.fiap.agendamentoapi.exceptions.SenhaIncorretaException;
+import br.com.fiap.agendamentoapi.exceptions.TipoUsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.exceptions.dto.ErrorResponseDTO;
 import br.com.fiap.agendamentoapi.exceptions.dto.MethodArgumentNotValidResponseDTO;
@@ -32,7 +33,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 "Erro de Validação!",
                 pHttpServletRequest.getRequestURI(),
-                "/RestauranteAPI/problems/validation-error",
+                "/AgendamentoAPI/problems/validation-error",
                 "A requisição contém dados inválidos!",
                 errors
         );
@@ -47,7 +48,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 "Requisição Inválida!",
                 pHttpServletRequest.getRequestURI(),
-                "/RestauranteAPI/problems/unreadable-message",
+                "/AgendamentoAPI/problems/unreadable-message",
                 ex.getMostSpecificCause().getMessage(),
                 ex.getMessage());
 
@@ -61,7 +62,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 "Senha Incorreta!",
                 pHttpServletRequest.getRequestURI(),
-                "/RestauranteAPI/problems/invalid-password",
+                "/AgendamentoAPI/problems/invalid-password",
                 ex.getMessage());
 
         return ResponseEntity.badRequest().body(response);
@@ -74,7 +75,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 "Requisição Inválida!",
                 pHttpServletRequest.getRequestURI(),
-                "/RestauranteAPI/problems/illegal-argument",
+                "/AgendamentoAPI/problems/illegal-argument",
                 "A requisição contém dados inválidos.",
                 ex.getMessage());
 
@@ -88,7 +89,20 @@ public class GlobalExceptionHandler {
                 HttpStatus.NOT_FOUND.value(),
                 "Usuário não encontrado!",
                 pHttpServletRequest.getRequestURI(),
-                "/RestauranteAPI/problems/usuario-not-found",
+                "/AgendamentoAPI/problems/usuario-not-found",
+                ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(TipoUsuarioNaoEncontradoException.class)
+    public ResponseEntity<ErrorResponseDTO> handleTipoUsuarioNaoEncontradoException(TipoUsuarioNaoEncontradoException ex, HttpServletRequest pHttpServletRequest) {
+
+        var response = new ErrorResponseDTO(
+                HttpStatus.NOT_FOUND.value(),
+                "Tipo Usuário não encontrado!",
+                pHttpServletRequest.getRequestURI(),
+                "/AgendamentoAPI/problems/usuario-not-found",
                 ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
@@ -101,7 +115,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.NOT_FOUND.value(),
                 "Registro não encontrado!",
                 pHttpServletRequest.getRequestURI(),
-                "/RestauranteAPI/problems/entity-not-found",
+                "/AgendamentoAPI/problems/entity-not-found",
                 "Não foi possível localizar um registro com o ID informado!",
                 ex.getMessage());
 
@@ -115,7 +129,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.NOT_FOUND.value(),
                 "Recurso não encontrado!",
                 pHttpServletRequest.getRequestURI(),
-                "/RestauranteAPI/problems/resource-not-found",
+                "/AgendamentoAPI/problems/resource-not-found",
                 "O endpoint informado não existe!",
                 ex.getMessage());
 
@@ -129,7 +143,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT.value(),
                 "Conflito de Dados!",
                 pHttpServletRequest.getRequestURI(),
-                "/RestauranteAPI/problems/data-integrity-violation",
+                "/AgendamentoAPI/problems/data-integrity-violation",
                 ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
@@ -142,7 +156,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Erro Interno no Servidor!",
                 pHttpServletRequest.getRequestURI(),
-                "/RestauranteAPI/problems/internal-server-error",
+                "/AgendamentoAPI/problems/internal-server-error",
                 ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
