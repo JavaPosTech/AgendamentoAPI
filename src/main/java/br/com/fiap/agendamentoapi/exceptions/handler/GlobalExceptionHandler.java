@@ -1,7 +1,7 @@
 package br.com.fiap.agendamentoapi.exceptions.handler;
 
-import br.com.fiap.agendamentoapi.exceptions.InvalidPasswordException;
-import br.com.fiap.agendamentoapi.exceptions.UserNotFoundException;
+import br.com.fiap.agendamentoapi.exceptions.SenhaIncorretaException;
+import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.exceptions.dto.ErrorResponseDTO;
 import br.com.fiap.agendamentoapi.exceptions.dto.MethodArgumentNotValidResponseDTO;
 import jakarta.persistence.EntityNotFoundException;
@@ -54,8 +54,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
-    @ExceptionHandler(InvalidPasswordException.class)
-    public ResponseEntity<ErrorResponseDTO> handleInvalidPasswordException(InvalidPasswordException ex, HttpServletRequest pHttpServletRequest) {
+    @ExceptionHandler(SenhaIncorretaException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidPasswordException(SenhaIncorretaException ex, HttpServletRequest pHttpServletRequest) {
 
         var response = new ErrorResponseDTO(
                 HttpStatus.BAD_REQUEST.value(),
@@ -81,8 +81,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponseDTO> handleUserNotFoundException(UserNotFoundException ex, HttpServletRequest pHttpServletRequest) {
+    @ExceptionHandler(UsuarioNaoEncontradoException.class)
+    public ResponseEntity<ErrorResponseDTO> handleUserNotFoundException(UsuarioNaoEncontradoException ex, HttpServletRequest pHttpServletRequest) {
 
         var response = new ErrorResponseDTO(
                 HttpStatus.NOT_FOUND.value(),
