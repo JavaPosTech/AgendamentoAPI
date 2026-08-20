@@ -1,24 +1,25 @@
-package br.com.fiap.agendamentoapi.model.mapper.paciente;
+package br.com.fiap.agendamentoapi.model.mapper.enfermeiro;
 
-import br.com.fiap.agendamentoapi.model.entity.paciente.Paciente;
-import br.com.fiap.agendamentoapi.model.request.paciente.AtualizarPacienteRequest;
-import br.com.fiap.agendamentoapi.model.request.paciente.CriarPacienteRequest;
+import br.com.fiap.agendamentoapi.model.entity.enfermeiro.Enfermeiro;
+import br.com.fiap.agendamentoapi.model.request.enfermeiro.AtualizarEnfermeiroRequest;
+import br.com.fiap.agendamentoapi.model.request.enfermeiro.CriarEnfermeiroRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
-public interface PacienteMapper {
+public interface EnfermeiroMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "usuario", ignore = true)
     @Mapping(target = "dataCadastro", ignore = true)
     @Mapping(target = "situacaoCadastro", ignore = true)
-    Paciente toEntity(CriarPacienteRequest request);
+    Enfermeiro toEntity(CriarEnfermeiroRequest request);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "usuario", ignore = true)
     @Mapping(target = "dataCadastro", ignore = true)
     @Mapping(target = "situacaoCadastro", ignore = true)
-    void updateEntity(AtualizarPacienteRequest request, @MappingTarget Paciente paciente);
+    void updateEntity(AtualizarEnfermeiroRequest request, @MappingTarget Enfermeiro enfermeiro);
+
 }

@@ -1,9 +1,9 @@
-package br.com.fiap.agendamentoapi.controller;
+package br.com.fiap.agendamentoapi.controller.paciente;
 
 import br.com.fiap.agendamentoapi.model.dto.paciente.PacienteDTO;
-import br.com.fiap.agendamentoapi.model.request.AtualizarPacienteRequest;
-import br.com.fiap.agendamentoapi.model.request.CriarPacienteRequest;
-import br.com.fiap.agendamentoapi.model.response.MensagemSucessoResponse;
+import br.com.fiap.agendamentoapi.model.request.paciente.AtualizarPacienteRequest;
+import br.com.fiap.agendamentoapi.model.request.paciente.CriarPacienteRequest;
+import br.com.fiap.agendamentoapi.model.response.sucesso.MensagemSucessoResponse;
 import br.com.fiap.agendamentoapi.model.response.page.PageResponse;
 import br.com.fiap.agendamentoapi.service.paciente.PacienteService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,12 +25,12 @@ public class PacienteController {
     private final PacienteService pacienteService;
 
     @GetMapping
-    public ResponseEntity<PageResponse<PacienteDTO>> getPacientes(@Parameter(hidden = true) @PageableDefault(size = 100, sort = "id") Pageable pageable) {
+    public ResponseEntity<PageResponse<PacienteDTO>> listar(@Parameter(hidden = true) @PageableDefault(size = 100, sort = "id") Pageable pageable) {
         return ResponseEntity.ok(pacienteService.getPacientes(pageable));
     }
 
     @PostMapping
-    public ResponseEntity<MensagemSucessoResponse> criar(@RequestBody @Valid CriarPacienteRequest criarPacienteRequest) {
+    public ResponseEntity<MensagemSucessoResponse> salvar(@RequestBody @Valid CriarPacienteRequest criarPacienteRequest) {
         return ResponseEntity.status(HttpStatus.CREATED.value()).body(pacienteService.salvar(criarPacienteRequest));
     }
 

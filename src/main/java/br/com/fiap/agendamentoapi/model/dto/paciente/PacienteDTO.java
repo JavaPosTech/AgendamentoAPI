@@ -22,12 +22,14 @@ public record PacienteDTO(
 
         String endereco,
 
-        @JsonFormat(pattern = "dd/MM/yyyy") LocalDate dataNascimento,
+        @JsonFormat(pattern = "dd/MM/yyyy")
+        LocalDate dataNascimento,
 
-        @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss") LocalDateTime dataCadastro,
+        @JsonFormat(pattern = "dd/MM/yyyy - HH:mm:ss")
+        LocalDateTime dataCadastro,
 
-        String situacaoCadastro)
-{
+        String situacaoCadastro
+) {
     public PacienteDTO(Paciente paciente) {
         this(paciente.getId(),
                 paciente.getUsuario().getId(),

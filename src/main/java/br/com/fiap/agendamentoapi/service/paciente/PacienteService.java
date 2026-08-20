@@ -6,10 +6,10 @@ import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.model.dto.paciente.PacienteDTO;
 import br.com.fiap.agendamentoapi.model.dto.usuario.UsuarioDTO;
 import br.com.fiap.agendamentoapi.model.mapper.paciente.PacienteMapper;
-import br.com.fiap.agendamentoapi.model.request.AtualizarPacienteRequest;
-import br.com.fiap.agendamentoapi.model.request.CriarPacienteRequest;
-import br.com.fiap.agendamentoapi.model.response.MensagemSucessoResponse;
+import br.com.fiap.agendamentoapi.model.request.paciente.AtualizarPacienteRequest;
+import br.com.fiap.agendamentoapi.model.request.paciente.CriarPacienteRequest;
 import br.com.fiap.agendamentoapi.model.response.page.PageResponse;
+import br.com.fiap.agendamentoapi.model.response.sucesso.MensagemSucessoResponse;
 import br.com.fiap.agendamentoapi.repository.paciente.PacienteRepository;
 import br.com.fiap.agendamentoapi.service.situacaocadastro.SituacaoCadastroService;
 import br.com.fiap.agendamentoapi.service.usuario.UsuarioService;
@@ -65,8 +65,6 @@ public class PacienteService {
         var paciente = pacienteRepository.findById(id).orElseThrow(() -> new UsuarioNaoEncontradoException("Paciente não encontrado!"));
 
         pacienteMapper.updateEntity(atualizarPacienteRequest, paciente);
-        pacienteRepository.save(paciente);
-
         log.info("Paciente atualizado com sucesso! - ID: [{}]", id);
         return new MensagemSucessoResponse(200, "Paciente atualizado com sucesso!");
     }
@@ -75,9 +73,8 @@ public class PacienteService {
     public void deletar(Integer id) {
         log.info("Excluindo Paciente... - ID: [{}]", id);
         var paciente = pacienteRepository.findById(id).orElseThrow(() -> new UsuarioNaoEncontradoException("Paciente não encontrado!"));
-        paciente.setSituacaoCadastro(situacaoCadastroService.buscarReferenciaPorId(SituacaoCadastro.EXCLUIDO.getId()));
 
-        pacienteRepository.save(paciente);
+        paciente.setSituacaoCadastro(situacaoCadastroService.buscarReferenciaPorId(SituacaoCadastro.EXCLUIDO.getId()));
         log.info("Paciente excluído com sucesso! - ID: [{}]", id);
     }
 }
