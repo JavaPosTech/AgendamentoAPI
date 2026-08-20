@@ -7,7 +7,7 @@ import br.com.fiap.agendamentoapi.model.dto.paciente.PacienteDTO;
 import br.com.fiap.agendamentoapi.model.dto.usuario.UsuarioDTO;
 import br.com.fiap.agendamentoapi.model.mapper.paciente.PacienteMapper;
 import br.com.fiap.agendamentoapi.model.request.AtualizarPacienteRequest;
-import br.com.fiap.agendamentoapi.model.request.PacienteRequest;
+import br.com.fiap.agendamentoapi.model.request.CriarPacienteRequest;
 import br.com.fiap.agendamentoapi.model.response.MensagemSucessoResponse;
 import br.com.fiap.agendamentoapi.model.response.page.PageResponse;
 import br.com.fiap.agendamentoapi.repository.paciente.PacienteRepository;
@@ -41,21 +41,21 @@ public class PacienteService {
     }
 
     @Transactional
-    public MensagemSucessoResponse salvar(PacienteRequest pacienteRequest) {
-        log.info("Salvando Paciente... - Nome: {}", pacienteRequest.nome());
+    public MensagemSucessoResponse salvar(CriarPacienteRequest criarPacienteRequest) {
+        log.info("Salvando Paciente... - Nome: {}", criarPacienteRequest.nome());
 
         var usuarioId = usuarioService.salvar(new UsuarioDTO(
-                pacienteRequest.login(),
-                pacienteRequest.senha(),
+                criarPacienteRequest.login(),
+                criarPacienteRequest.senha(),
                 TipoUsuario.PACIENTE.getId()));
 
-        var paciente = pacienteMapper.toEntity(pacienteRequest);
+        var paciente = pacienteMapper.toEntity(criarPacienteRequest);
         paciente.setDataCadastro(LocalDateTime.now());
         paciente.setUsuario(usuarioService.buscarReferenciaPorId(usuarioId));
         paciente.setSituacaoCadastro(situacaoCadastroService.buscarReferenciaPorId(SituacaoCadastro.ATIVO.getId()));
 
         pacienteRepository.save(paciente);
-        log.info("Paciente salvo com sucesso! - Nome: {}", pacienteRequest.nome());
+        log.info("Paciente salvo com sucesso! - Nome: {}", criarPacienteRequest.nome());
         return new MensagemSucessoResponse(201, "Paciente criado com sucesso!");
     }
 
