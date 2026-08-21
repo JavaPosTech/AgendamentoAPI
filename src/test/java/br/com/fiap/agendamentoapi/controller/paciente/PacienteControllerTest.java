@@ -1,4 +1,4 @@
-package br.com.fiap.agendamentoapi.controller;
+package br.com.fiap.agendamentoapi.controller.paciente;
 
 import br.com.fiap.agendamentoapi.config.AbstractControllerTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,12 +25,12 @@ class PacienteControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void getPacientesTest() throws Exception {
+    void listarTest() throws Exception {
         testGet("/v1/paciente");
     }
 
     @Test
-    void criarPacientesTest() throws Exception {
+    void salvarTest() throws Exception {
         testPost("/v1/paciente", criarPacienteRequest);
     }
 

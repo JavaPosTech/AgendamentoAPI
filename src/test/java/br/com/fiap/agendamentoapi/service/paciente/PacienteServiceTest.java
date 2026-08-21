@@ -51,7 +51,7 @@ class PacienteServiceTest extends AbstractTest {
     }
 
     @Test
-    void atualizarTestWithException() {
+    void atualizarTestComIdInexistente() {
         Assertions.assertThrows(UsuarioNaoEncontradoException.class, () -> pacienteService.atualizar(Integer.MAX_VALUE, new AtualizarPacienteRequest(
                 "Nome Atualizado",
                 "Sobrenome Atualizado",
@@ -67,7 +67,7 @@ class PacienteServiceTest extends AbstractTest {
     }
 
     @Test
-    void deletarTestWithException() {
+    void deletarTestComIdInexistente() {
         Assertions.assertThrows(UsuarioNaoEncontradoException.class, () -> pacienteService.deletar(Integer.MAX_VALUE));
     }
 }
