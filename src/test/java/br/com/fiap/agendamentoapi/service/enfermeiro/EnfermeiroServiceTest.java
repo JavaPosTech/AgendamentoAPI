@@ -28,7 +28,7 @@ class EnfermeiroServiceTest extends AbstractTest {
                 "Login Teste",
                 "Senha Teste",
                 "Teste",
-                "Rua Teste, 123",
+                "Teste",
                 "COREN-TESTE"
         )));
     }
