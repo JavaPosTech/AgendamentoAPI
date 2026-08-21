@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
-@Schema(description = "Representa o modelo de requisição para atualizar um paciente.")
+@Schema(description = "Representa o modelo de requisição para atualizar um Paciente.")
 public record AtualizarPacienteRequest(
 
         @NotBlank(message = "O campo 'nome' é obrigatório!")

@@ -3,7 +3,7 @@ package br.com.fiap.agendamentoapi.model.request.enfermeiro;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
-@Schema(description = "Representa o modelo de requisição para criar um enfermeiro.")
+@Schema(description = "Representa o modelo de requisição para criar um Enfermeiro.")
 public record CriarEnfermeiroRequest(
 
         @NotBlank(message = "O campo 'login' é obrigatório!")

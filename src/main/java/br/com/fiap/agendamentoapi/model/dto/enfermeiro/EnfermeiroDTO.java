@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
 
-@Schema(description = "Representa o modelo de dados de um enfermeiro.")
+@Schema(description = "Representa o modelo de dados de um Enfermeiro.")
 public record EnfermeiroDTO(
 
         Integer id,

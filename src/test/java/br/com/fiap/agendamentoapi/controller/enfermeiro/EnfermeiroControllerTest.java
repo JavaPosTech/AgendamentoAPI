@@ -42,5 +42,4 @@ class EnfermeiroControllerTest extends AbstractControllerTest {
     void deletarTest() throws Exception {
         testDelete("/v1/enfermeiro/1");
     }
-
 }
