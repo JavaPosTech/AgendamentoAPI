@@ -28,10 +28,10 @@ class MedicoServiceTest extends AbstractTest {
                 "Login Teste",
                 "Senha Teste",
                 "Teste",
-                "Rua Teste, 1234",
+                "Teste",
                 "CRM-TESTE",
                 "TESTE",
-                "TESTE"
+                "Rua Teste, 1234"
         )));
     }
 
