@@ -19,8 +19,8 @@ class PacienteControllerTest extends AbstractControllerTest {
     @BeforeEach
     void setUp() throws IOException {
         if (criarPacienteRequest == null && atualizarPacienteRequest == null) {
-            criarPacienteRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/criarPacienteRequest.json")));
-            atualizarPacienteRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/atualizarPacienteRequest.json")));
+            criarPacienteRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/paciente/criarPacienteRequest.json")));
+            atualizarPacienteRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/paciente/atualizarPacienteRequest.json")));
         }
     }
 
