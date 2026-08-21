@@ -44,7 +44,7 @@ class PacienteServiceTest extends AbstractTest {
         Assertions.assertDoesNotThrow(() -> pacienteService.atualizar(1, new AtualizarPacienteRequest(
                 "Nome Atualizado",
                 "Sobrenome Atualizado",
-                "0987654321",
+                "09876543210",
                 "Teste Atualizado",
                 LocalDate.now())
         ));
