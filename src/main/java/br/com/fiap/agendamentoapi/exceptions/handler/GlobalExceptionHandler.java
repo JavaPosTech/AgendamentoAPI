@@ -102,7 +102,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.NOT_FOUND.value(),
                 "Tipo Usuário não encontrado!",
                 pHttpServletRequest.getRequestURI(),
-                "/AgendamentoAPI/problems/usuario-not-found",
+                "/AgendamentoAPI/problems/tipo-usuario-not-found",
                 ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
