@@ -5,9 +5,10 @@ import br.com.fiap.agendamentoapi.enums.TipoUsuario;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.model.dto.paciente.PacienteDTO;
 import br.com.fiap.agendamentoapi.model.dto.usuario.UsuarioDTO;
+import br.com.fiap.agendamentoapi.model.entity.paciente.Paciente;
 import br.com.fiap.agendamentoapi.model.mapper.paciente.PacienteMapper;
 import br.com.fiap.agendamentoapi.model.request.paciente.AtualizarPacienteRequest;
-import br.com.fiap.agendamentoapi.model.request.paciente.CriarPacienteRequest;
+import br.com.fiap.agendamentoapi.model.request.paciente.SalvarPacienteRequest;
 import br.com.fiap.agendamentoapi.model.response.page.PageResponse;
 import br.com.fiap.agendamentoapi.model.response.sucesso.MensagemSucessoResponse;
 import br.com.fiap.agendamentoapi.repository.paciente.PacienteRepository;
@@ -40,22 +41,27 @@ public class PacienteService {
         return PageResponse.from(pacienteRepository.findAll(pageable), PacienteDTO::new);
     }
 
+    public Paciente getPacienteById(Integer id) {
+        log.info("Buscando informações do Paciente - ID: [{}]", id);
+        return pacienteRepository.findById(id).orElseThrow(() -> new UsuarioNaoEncontradoException("Paciente não encontrado!"));
+    }
+
     @Transactional
-    public MensagemSucessoResponse salvar(CriarPacienteRequest criarPacienteRequest) {
-        log.info("Salvando Paciente... - Nome: {}", criarPacienteRequest.nome());
+    public MensagemSucessoResponse salvar(SalvarPacienteRequest salvarPacienteRequest) {
+        log.info("Salvando Paciente... - Nome: {}", salvarPacienteRequest.nome());
 
         var usuarioId = usuarioService.salvar(new UsuarioDTO(
-                criarPacienteRequest.login(),
-                criarPacienteRequest.senha(),
+                salvarPacienteRequest.login(),
+                salvarPacienteRequest.senha(),
                 TipoUsuario.PACIENTE.getId()));
 
-        var paciente = pacienteMapper.toEntity(criarPacienteRequest);
+        var paciente = pacienteMapper.toEntity(salvarPacienteRequest);
         paciente.setDataCadastro(LocalDateTime.now());
         paciente.setUsuario(usuarioService.buscarReferenciaPorId(usuarioId));
         paciente.setSituacaoCadastro(situacaoCadastroService.buscarReferenciaPorId(SituacaoCadastro.ATIVO.getId()));
 
         pacienteRepository.save(paciente);
-        log.info("Paciente salvo com sucesso! - Nome: {}", criarPacienteRequest.nome());
+        log.info("Paciente salvo com sucesso! - Nome: {}", salvarPacienteRequest.nome());
         return new MensagemSucessoResponse(201, "Paciente criado com sucesso!");
     }
 

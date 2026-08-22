@@ -2,7 +2,7 @@ package br.com.fiap.agendamentoapi.model.mapper.paciente;
 
 import br.com.fiap.agendamentoapi.model.entity.paciente.Paciente;
 import br.com.fiap.agendamentoapi.model.request.paciente.AtualizarPacienteRequest;
-import br.com.fiap.agendamentoapi.model.request.paciente.CriarPacienteRequest;
+import br.com.fiap.agendamentoapi.model.request.paciente.SalvarPacienteRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -14,7 +14,7 @@ public interface PacienteMapper {
     @Mapping(target = "usuario", ignore = true)
     @Mapping(target = "dataCadastro", ignore = true)
     @Mapping(target = "situacaoCadastro", ignore = true)
-    Paciente toEntity(CriarPacienteRequest request);
+    Paciente toEntity(SalvarPacienteRequest request);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "usuario", ignore = true)

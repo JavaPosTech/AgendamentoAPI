@@ -10,12 +10,6 @@ INSERT INTO public.situacao_cadastro (descricao) VALUES
 ('EXCLUIDO')
 ON CONFLICT (descricao) DO NOTHING;
 
-INSERT INTO public.status_consulta (descricao) VALUES
-('AGENDADO'),
-('FINALIZADO'),
-('CANCELADO')
-ON CONFLICT (descricao) DO NOTHING;
-
 INSERT INTO public.usuario (login, senha, id_tipousuario) VALUES
 ('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1),
 ('joao.silva', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 2),

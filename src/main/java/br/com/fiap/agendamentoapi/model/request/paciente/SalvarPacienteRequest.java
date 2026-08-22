@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 @Schema(description = "Representa o modelo de requisição para criar um Paciente.")
-public record CriarPacienteRequest(
+public record SalvarPacienteRequest(
 
         @NotBlank(message = "O campo 'login' é obrigatório!")
         String login,

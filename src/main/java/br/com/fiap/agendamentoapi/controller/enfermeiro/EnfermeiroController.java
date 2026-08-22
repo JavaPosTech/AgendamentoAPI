@@ -2,7 +2,7 @@ package br.com.fiap.agendamentoapi.controller.enfermeiro;
 
 import br.com.fiap.agendamentoapi.model.dto.enfermeiro.EnfermeiroDTO;
 import br.com.fiap.agendamentoapi.model.request.enfermeiro.AtualizarEnfermeiroRequest;
-import br.com.fiap.agendamentoapi.model.request.enfermeiro.CriarEnfermeiroRequest;
+import br.com.fiap.agendamentoapi.model.request.enfermeiro.SalvarEnfermeiroRequest;
 import br.com.fiap.agendamentoapi.model.response.page.PageResponse;
 import br.com.fiap.agendamentoapi.model.response.sucesso.MensagemSucessoResponse;
 import br.com.fiap.agendamentoapi.service.enfermeiro.EnfermeiroService;
@@ -30,8 +30,8 @@ public class EnfermeiroController {
     }
 
     @PostMapping
-    public ResponseEntity<MensagemSucessoResponse> salvar(@RequestBody @Valid CriarEnfermeiroRequest criarEnfermeiroRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED.value()).body(enfermeiroService.salvar(criarEnfermeiroRequest));
+    public ResponseEntity<MensagemSucessoResponse> salvar(@RequestBody @Valid SalvarEnfermeiroRequest salvarEnfermeiroRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED.value()).body(enfermeiroService.salvar(salvarEnfermeiroRequest));
     }
 
     @PatchMapping("/{id}")

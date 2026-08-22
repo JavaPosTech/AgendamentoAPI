@@ -7,7 +7,7 @@ import br.com.fiap.agendamentoapi.model.dto.enfermeiro.EnfermeiroDTO;
 import br.com.fiap.agendamentoapi.model.dto.usuario.UsuarioDTO;
 import br.com.fiap.agendamentoapi.model.mapper.enfermeiro.EnfermeiroMapper;
 import br.com.fiap.agendamentoapi.model.request.enfermeiro.AtualizarEnfermeiroRequest;
-import br.com.fiap.agendamentoapi.model.request.enfermeiro.CriarEnfermeiroRequest;
+import br.com.fiap.agendamentoapi.model.request.enfermeiro.SalvarEnfermeiroRequest;
 import br.com.fiap.agendamentoapi.model.response.page.PageResponse;
 import br.com.fiap.agendamentoapi.model.response.sucesso.MensagemSucessoResponse;
 import br.com.fiap.agendamentoapi.repository.enfermeiro.EnfermeiroRepository;
@@ -41,21 +41,21 @@ public class EnfermeiroService {
     }
 
     @Transactional
-    public MensagemSucessoResponse salvar(CriarEnfermeiroRequest criarEnfermeiroRequest) {
-        log.info("Salvando Enfermeiro... - Nome: {}", criarEnfermeiroRequest.nome());
+    public MensagemSucessoResponse salvar(SalvarEnfermeiroRequest salvarEnfermeiroRequest) {
+        log.info("Salvando Enfermeiro... - Nome: {}", salvarEnfermeiroRequest.nome());
 
         var usuarioId = usuarioService.salvar(new UsuarioDTO(
-                criarEnfermeiroRequest.login(),
-                criarEnfermeiroRequest.senha(),
+                salvarEnfermeiroRequest.login(),
+                salvarEnfermeiroRequest.senha(),
                 TipoUsuario.ENFERMEIRO.getId()));
 
-        var enfermeiro = enfermeiroMapper.toEntity(criarEnfermeiroRequest);
+        var enfermeiro = enfermeiroMapper.toEntity(salvarEnfermeiroRequest);
         enfermeiro.setDataCadastro(LocalDateTime.now());
         enfermeiro.setUsuario(usuarioService.buscarReferenciaPorId(usuarioId));
         enfermeiro.setSituacaoCadastro(situacaoCadastroService.buscarReferenciaPorId(SituacaoCadastro.ATIVO.getId()));
 
         enfermeiroRepository.save(enfermeiro);
-        log.info("Enfermeiro salvo com sucesso! - Nome: {}", criarEnfermeiroRequest.nome());
+        log.info("Enfermeiro salvo com sucesso! - Nome: {}", salvarEnfermeiroRequest.nome());
         return new MensagemSucessoResponse(201, "Enfermeiro criado com sucesso!");
     }
 

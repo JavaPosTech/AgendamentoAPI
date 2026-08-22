@@ -1,7 +1,9 @@
 package br.com.fiap.agendamentoapi.model.dto.agendamento;
 
+import br.com.fiap.agendamentoapi.model.entity.agendamento.Agendamento;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDateTime;
 
 @Schema(description = "Representa o modelo de dados de um Agendamento.")
@@ -9,11 +11,9 @@ public record AgendamentoDTO(
 
         Integer id,
 
-        Integer medicoId,
+        String medico,
 
-        Integer pacienteId,
-
-        String statusConsulta,
+        String paciente,
 
         @JsonFormat(pattern = "dd/MM/yyyy - HH:mm:ss")
         LocalDateTime dataHoraConsulta,
@@ -21,4 +21,12 @@ public record AgendamentoDTO(
         @JsonFormat(pattern = "dd/MM/yyyy - HH:mm:ss")
         LocalDateTime dataCadastro
 
-) {}
+) {
+    public AgendamentoDTO(Agendamento agendamento) {
+        this(agendamento.getId(),
+                agendamento.getMedico().getNome(),
+                agendamento.getPaciente().getNome(),
+                agendamento.getDataHoraConsulta(),
+                agendamento.getDataCadastro());
+    }
+}

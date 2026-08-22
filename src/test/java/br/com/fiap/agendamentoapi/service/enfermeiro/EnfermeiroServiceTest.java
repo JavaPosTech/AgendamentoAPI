@@ -3,7 +3,7 @@ package br.com.fiap.agendamentoapi.service.enfermeiro;
 import br.com.fiap.agendamentoapi.config.AbstractTest;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.model.request.enfermeiro.AtualizarEnfermeiroRequest;
-import br.com.fiap.agendamentoapi.model.request.enfermeiro.CriarEnfermeiroRequest;
+import br.com.fiap.agendamentoapi.model.request.enfermeiro.SalvarEnfermeiroRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ class EnfermeiroServiceTest extends AbstractTest {
 
     @Test
     void salvarTest() {
-        Assertions.assertDoesNotThrow(() -> enfermeiroService.salvar(new CriarEnfermeiroRequest(
+        Assertions.assertDoesNotThrow(() -> enfermeiroService.salvar(new SalvarEnfermeiroRequest(
                 "Login Teste",
                 "Senha Teste",
                 "Teste",

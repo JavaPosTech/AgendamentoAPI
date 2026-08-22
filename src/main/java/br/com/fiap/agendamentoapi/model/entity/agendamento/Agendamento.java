@@ -2,7 +2,6 @@ package br.com.fiap.agendamentoapi.model.entity.agendamento;
 
 import br.com.fiap.agendamentoapi.model.entity.medico.Medico;
 import br.com.fiap.agendamentoapi.model.entity.paciente.Paciente;
-import br.com.fiap.agendamentoapi.model.entity.status.StatusConsulta;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,10 +25,6 @@ public class Agendamento {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_paciente", nullable = false)
     private Paciente paciente;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_statusconsulta", nullable = false)
-    private StatusConsulta statusConsulta;
 
     @Column(name = "datahora_consulta", nullable = false)
     private LocalDateTime dataHoraConsulta;

@@ -3,7 +3,7 @@ package br.com.fiap.agendamentoapi.service.medico;
 import br.com.fiap.agendamentoapi.config.AbstractTest;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.model.request.medico.AtualizarMedicoRequest;
-import br.com.fiap.agendamentoapi.model.request.medico.CriarMedicoRequest;
+import br.com.fiap.agendamentoapi.model.request.medico.SalvarMedicoRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ class MedicoServiceTest extends AbstractTest {
 
     @Test
     void salvarTest() {
-        Assertions.assertDoesNotThrow(() -> medicoService.salvar(new CriarMedicoRequest(
+        Assertions.assertDoesNotThrow(() -> medicoService.salvar(new SalvarMedicoRequest(
                 "Login Teste",
                 "Senha Teste",
                 "Teste",

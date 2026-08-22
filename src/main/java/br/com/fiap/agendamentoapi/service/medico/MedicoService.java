@@ -5,9 +5,10 @@ import br.com.fiap.agendamentoapi.enums.TipoUsuario;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.model.dto.medico.MedicoDTO;
 import br.com.fiap.agendamentoapi.model.dto.usuario.UsuarioDTO;
+import br.com.fiap.agendamentoapi.model.entity.medico.Medico;
 import br.com.fiap.agendamentoapi.model.mapper.medico.MedicoMapper;
 import br.com.fiap.agendamentoapi.model.request.medico.AtualizarMedicoRequest;
-import br.com.fiap.agendamentoapi.model.request.medico.CriarMedicoRequest;
+import br.com.fiap.agendamentoapi.model.request.medico.SalvarMedicoRequest;
 import br.com.fiap.agendamentoapi.model.response.page.PageResponse;
 import br.com.fiap.agendamentoapi.model.response.sucesso.MensagemSucessoResponse;
 import br.com.fiap.agendamentoapi.repository.medico.MedicoRepository;
@@ -40,22 +41,27 @@ public class MedicoService {
         return PageResponse.from(medicoRepository.findAll(pageable), MedicoDTO::new);
     }
 
+    public Medico getMedicoById(Integer id) {
+        log.info("Buscando informações do Médico - ID: [{}]", id);
+        return medicoRepository.findById(id).orElseThrow(() -> new UsuarioNaoEncontradoException("Médico não encontrado!"));
+    }
+
     @Transactional
-    public MensagemSucessoResponse salvar(CriarMedicoRequest criarMedicoRequest) {
-        log.info("Salvando Médico... - Nome: {}", criarMedicoRequest.nome());
+    public MensagemSucessoResponse salvar(SalvarMedicoRequest salvarMedicoRequest) {
+        log.info("Salvando Médico... - Nome: {}", salvarMedicoRequest.nome());
 
         var usuarioId = usuarioService.salvar(new UsuarioDTO(
-                criarMedicoRequest.login(),
-                criarMedicoRequest.senha(),
+                salvarMedicoRequest.login(),
+                salvarMedicoRequest.senha(),
                 TipoUsuario.MEDICO.getId()));
 
-        var medico = medicoMapper.toEntity(criarMedicoRequest);
+        var medico = medicoMapper.toEntity(salvarMedicoRequest);
         medico.setDataCadastro(LocalDateTime.now());
         medico.setUsuario(usuarioService.buscarReferenciaPorId(usuarioId));
         medico.setSituacaoCadastro(situacaoCadastroService.buscarReferenciaPorId(SituacaoCadastro.ATIVO.getId()));
 
         medicoRepository.save(medico);
-        log.info("Médico salvo com sucesso! - Nome: {}", criarMedicoRequest.nome());
+        log.info("Médico salvo com sucesso! - Nome: {}", salvarMedicoRequest.nome());
         return new MensagemSucessoResponse(201, "Médico criado com sucesso!");
     }
 

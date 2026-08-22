@@ -8,11 +8,6 @@ CREATE TABLE IF NOT EXISTS public.situacao_cadastro (
     descricao VARCHAR(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS public.status_consulta (
-    id SERIAL PRIMARY KEY,
-    descricao VARCHAR(50) NOT NULL UNIQUE
-);
-
 CREATE TABLE IF NOT EXISTS public.usuario (
     id SERIAL PRIMARY KEY,
     login VARCHAR(100) NOT NULL UNIQUE,
@@ -66,10 +61,8 @@ CREATE TABLE IF NOT EXISTS public.agendamento (
     id_medico INTEGER NOT NULL,
     id_paciente INTEGER NOT NULL,
     datahora_consulta TIMESTAMP NOT NULL,
-    id_statusconsulta INTEGER NOT NULL DEFAULT 1,
     data_cadastro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_medico) REFERENCES public.medico(id),
     FOREIGN KEY (id_paciente) REFERENCES public.paciente(id),
-    FOREIGN KEY (id_statusconsulta) REFERENCES public.status_consulta(id),
     CONSTRAINT uk_agendamento_medico_horario UNIQUE (id_medico, datahora_consulta)
 );

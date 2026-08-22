@@ -1,5 +1,6 @@
 package br.com.fiap.agendamentoapi.exceptions.handler;
 
+import br.com.fiap.agendamentoapi.exceptions.ConsultaNaoEncontradaException;
 import br.com.fiap.agendamentoapi.exceptions.SenhaIncorretaException;
 import br.com.fiap.agendamentoapi.exceptions.TipoUsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
@@ -103,6 +104,19 @@ public class GlobalExceptionHandler {
                 "Tipo Usuário não encontrado!",
                 pHttpServletRequest.getRequestURI(),
                 "/AgendamentoAPI/problems/tipo-usuario-not-found",
+                ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(ConsultaNaoEncontradaException.class)
+    public ResponseEntity<ErrorResponseDTO> handleConsultaNaoEncontradaException(ConsultaNaoEncontradaException ex, HttpServletRequest pHttpServletRequest) {
+
+        var response = new ErrorResponseDTO(
+                HttpStatus.NOT_FOUND.value(),
+                "Consulta não encontrada!",
+                pHttpServletRequest.getRequestURI(),
+                "/AgendamentoAPI/problems/consulta-not-found",
                 ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
