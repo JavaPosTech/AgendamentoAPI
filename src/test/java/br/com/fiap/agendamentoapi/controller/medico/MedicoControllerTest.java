@@ -12,14 +12,14 @@ import java.nio.file.Paths;
 @SpringBootTest
 class MedicoControllerTest extends AbstractControllerTest {
 
-    private String criarMedicoRequest;
+    private String salvarMedicoRequest;
 
     private String atualizarMedicoRequest;
 
     @BeforeEach
     void setUp() throws IOException {
-        if (criarMedicoRequest == null && atualizarMedicoRequest == null) {
-            criarMedicoRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/medico/criarMedicoRequest.json")));
+        if (salvarMedicoRequest == null && atualizarMedicoRequest == null) {
+            salvarMedicoRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/medico/salvarMedicoRequest.json")));
             atualizarMedicoRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/medico/atualizarMedicoRequest.json")));
         }
     }
@@ -31,7 +31,7 @@ class MedicoControllerTest extends AbstractControllerTest {
 
     @Test
     void salvarTest() throws Exception {
-        testPost("/v1/medico", criarMedicoRequest);
+        testPost("/v1/medico", salvarMedicoRequest);
     }
 
     @Test
