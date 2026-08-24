@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 public class MedicoController {
 
     private final MedicoService medicoService;
+   //Todos os enndpoints menos o de salvar novo vai solicitar o bearer token, 
+   // no postman em authorization adicionar o token que e gerado quando o usuario loga
 
     @GetMapping
     public ResponseEntity<PageResponse<MedicoDTO>> listar(@Parameter(hidden = true) @PageableDefault(size = 100, sort = "id") Pageable pageable) {

@@ -66,6 +66,12 @@ $ Exemplo: postgres
 
 # DATABASE_PASSWORD
 $ Exemplo: postgres@2026
+
+# JWT_SECRET
+$ Exemplo: uma string aleatória com pelo menos 32 caracteres
+
+# JWT_EXPIRATION_MS
+$ Exemplo: 86400000 (24 horas)
 ```
 
 > ℹ️ Importante: a variável `DATABASE_PORT` representa a porta utilizada pela aplicação para se conectar ao banco de dados dentro da rede interna do Docker.
@@ -101,6 +107,44 @@ Dessa forma, a API será iniciada utilizando as variáveis definidas no arquivo 
 > ℹ️ Quando a API é executada em produção, é criada automaticamente uma pasta chamada `logs` no diretório onde a aplicação está sendo executada. Essa pasta é responsável por armazenar todos os logs gerados pela API, sendo organizados de forma diária, ou seja, a cada novo dia é gerado um arquivo específico contendo a data correspondente, facilitando a rastreabilidade e análise das execuções. Além disso, a aplicação possui uma política de limpeza automática, na qual os arquivos de `logs` são mantidos por um período de 30 dias. Após esse prazo, os `logs` mais antigos são excluídos automaticamente, garantindo melhor gerenciamento de armazenamento.
 
 <br> 
+
+## 🔐 Autenticação
+
+A API utiliza autenticação via **JWT (JSON Web Token)**. Antes de acessar qualquer endpoint protegido, é necessário realizar login para obter um token de acesso.
+
+```bash
+# Endpoint de login
+POST /v1/auth/login
+```
+
+A resposta traz o token que deve ser enviado no header `Authorization` das próximas requisições:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzUxMiJ9...",
+  "tipo": "Bearer"
+}
+```
+
+```bash
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9...
+```
+
+O token expira em 24 horas (configurável via `JWT_EXPIRATION_MS`). Após expirar, é necessário realizar login novamente.
+
+> ⚠️ Cadastro (`POST`) de Médico, Paciente e Enfermeiro **não exige token** (autocadastro livre). Todas as demais operações — listar, atualizar e excluir — exigem um usuário autenticado.
+
+<br>
+
+### Sobre as senhas no banco de dados
+
+O projeto utiliza **BCrypt** para armazenar senhas. Isso significa que a senha de um usuário **nunca** fica salva em texto puro no banco — o que aparece na coluna `senha` (por exemplo, `$2y$05$ZpywJEw26dx/wK55JdAE7uSjF00ckF.qZwx4zqlVrKUjVxsIXr66a`) é um **hash criptográfico**, gerado a partir da senha real combinada com um valor aleatório (chamado de "sal"). Esse processo é de mão única: não existe forma de reverter o hash de volta para a senha original.
+
+Para fazer login, você sempre usa a senha **em texto puro** que foi escolhida no cadastro — nunca o hash salvo no banco.
+
+> ℹ️ Hoje, no seed de testes, todos os usuários compartilham o **mesmo hash** no banco — isso é só uma facilidade para os testes locais. Usuários cadastrados normalmente pela API terão hashes diferentes entre si mesmo usando a mesma senha, pois o BCrypt gera um sal aleatório novo a cada cadastro.
+
+<br>
 
 ## 📑 Swagger
 
