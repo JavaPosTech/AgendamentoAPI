@@ -24,8 +24,6 @@ public class PacienteController {
 
     private final PacienteService pacienteService;
 
-    //Todos os enndpoints menos o de salvar novo vai solicitar o bearer token, 
-    // no postman em authorization adicionar o token que e gerado quando o usuario loga
     @GetMapping
     public ResponseEntity<PageResponse<PacienteDTO>> listar(@Parameter(hidden = true) @PageableDefault(size = 100, sort = "id") Pageable pageable) {
         return ResponseEntity.ok(pacienteService.getPacientes(pageable));

@@ -1,4 +1,4 @@
-package br.com.fiap.agendamentoapi.security;
+package br.com.fiap.agendamentoapi.service.auth;
 
 import br.com.fiap.agendamentoapi.model.entity.usuario.Usuario;
 import io.jsonwebtoken.JwtException;
@@ -14,13 +14,13 @@ import java.util.Date;
 @Component
 public class TokenService {
 
+    @Value("${JWT_EXPIRATION_MS:86400000}")
+    private long expirationMs;
+
     private static final String ISSUER = "agendamento-api";
 
     @Value("${JWT_SECRET:agendamento-api-jwt-default-dev-secret-nao-utilizar-em-producao-2026}")
     private String secret;
-
-    @Value("${JWT_EXPIRATION_MS:86400000}")
-    private long expirationMs;
 
     public String gerarToken(Usuario usuario) {
         var agora = Instant.now();

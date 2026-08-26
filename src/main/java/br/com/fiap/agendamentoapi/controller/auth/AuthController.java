@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/auth")
-//para logar com o usuario e pegar o token gerado para poder utilizar nos endpoints necessarios get/post/path
 @Tag(name = "Autenticação", description = "Endpoints relacionados à autenticação de Usuários")
 public class AuthController {
 

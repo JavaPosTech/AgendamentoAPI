@@ -4,7 +4,6 @@ import br.com.fiap.agendamentoapi.exceptions.SenhaIncorretaException;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.model.request.auth.LoginRequest;
 import br.com.fiap.agendamentoapi.repository.usuario.UsuarioRepository;
-import br.com.fiap.agendamentoapi.security.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;

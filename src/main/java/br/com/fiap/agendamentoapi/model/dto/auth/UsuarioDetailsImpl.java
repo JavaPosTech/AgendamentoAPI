@@ -1,6 +1,7 @@
-package br.com.fiap.agendamentoapi.security;
+package br.com.fiap.agendamentoapi.model.dto.auth;
 
 import br.com.fiap.agendamentoapi.model.entity.usuario.Usuario;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +11,7 @@ import java.util.List;
 
 public class UsuarioDetailsImpl implements UserDetails {
 
+    @Getter
     private final Usuario usuario;
 
     private final Collection<? extends GrantedAuthority> authorities;
@@ -17,10 +19,6 @@ public class UsuarioDetailsImpl implements UserDetails {
     public UsuarioDetailsImpl(Usuario usuario, String tipoUsuarioDescricao) {
         this.usuario = usuario;
         this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + tipoUsuarioDescricao));
-    }
-
-    public Usuario getUsuario() {
-        return usuario;
     }
 
     @Override

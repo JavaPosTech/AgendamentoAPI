@@ -1,5 +1,7 @@
-package br.com.fiap.agendamentoapi.security;
+package br.com.fiap.agendamentoapi.config.security;
 
+import br.com.fiap.agendamentoapi.service.auth.TokenService;
+import br.com.fiap.agendamentoapi.service.auth.UsuarioDetailsServiceImpl;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -7,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -25,7 +28,7 @@ public class SecurityFilter extends OncePerRequestFilter {
     private final UsuarioDetailsServiceImpl usuarioDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         var token = extrairToken(request);
 
         if (StringUtils.hasText(token)) {

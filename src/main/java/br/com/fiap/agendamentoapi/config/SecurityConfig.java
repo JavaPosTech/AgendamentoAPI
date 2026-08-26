@@ -1,8 +1,7 @@
 package br.com.fiap.agendamentoapi.config;
 
-import br.com.fiap.agendamentoapi.security.JwtAccessDeniedHandler;
-import br.com.fiap.agendamentoapi.security.JwtAuthenticationEntryPoint;
-import br.com.fiap.agendamentoapi.security.SecurityFilter;
+import br.com.fiap.agendamentoapi.exceptions.handler.GlobalExceptionHandler;
+import br.com.fiap.agendamentoapi.config.security.SecurityFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +18,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final SecurityFilter securityFilter;
+
     private static final String[] ENDPOINTS_PUBLICOS = {
             "/v1/auth/login",
             "/v3/api-docs/**",
@@ -32,19 +33,13 @@ public class SecurityConfig {
             "/v1/enfermeiro"
     };
 
-    private final SecurityFilter securityFilter;
-
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-
-    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity pHttpSecurity) {
+    public SecurityFilterChain securityFilterChain(HttpSecurity pHttpSecurity, GlobalExceptionHandler globalExceptionHandler) {
         return pHttpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
@@ -52,8 +47,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, ENDPOINTS_CADASTRO_PUBLICO).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                        .accessDeniedHandler(jwtAccessDeniedHandler))
+                        .authenticationEntryPoint(globalExceptionHandler)
+                        .accessDeniedHandler(globalExceptionHandler))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
