@@ -6,19 +6,31 @@ import br.com.fiap.agendamentoapi.exceptions.TipoUsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.exceptions.dto.ErrorResponseDTO;
 import br.com.fiap.agendamentoapi.exceptions.dto.MethodArgumentNotValidResponseDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.io.IOException;
+
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler implements AuthenticationEntryPoint, AccessDeniedHandler {
+
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDTO> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex, HttpServletRequest pHttpServletRequest) {
@@ -174,5 +186,37 @@ public class GlobalExceptionHandler {
                 ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response, @NonNull AuthenticationException authException) throws IOException {
+        var errorResponse = new ErrorResponseDTO(
+                HttpStatus.UNAUTHORIZED.value(),
+                "Não Autorizado!",
+                request.getRequestURI(),
+                "/AgendamentoAPI/problems/unauthorized",
+                "Token de acesso ausente, inválido ou expirado!"
+        );
+
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+    }
+
+    @Override
+    public void handle(HttpServletRequest request, HttpServletResponse response, @NonNull AccessDeniedException accessDeniedException) throws IOException {
+        var errorResponse = new ErrorResponseDTO(
+                HttpStatus.FORBIDDEN.value(),
+                "Acesso Negado!",
+                request.getRequestURI(),
+                "/AgendamentoAPI/problems/access-denied",
+                "Você não tem permissão para acessar este recurso!"
+        );
+
+        response.setStatus(HttpStatus.FORBIDDEN.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }
