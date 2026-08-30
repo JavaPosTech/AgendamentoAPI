@@ -1,0 +1,8 @@
+{
+  "pacienteId": 1,
+  "queixaPrincipal": "Dor de cabeça",
+  "historicoDoenca": "Paciente relata dor de cabeça recorrente.",
+  "medicamentos": "Paracetamol 750mg",
+  "alergias": "Nenhuma alergia conhecida.",
+  "observacoes": "Acompanhar evolução dos sintomas."
+}

@@ -10,7 +10,8 @@ public enum TipoUsuario {
     ADMINISTRADOR(1, "ADMINISTRADOR"),
     MEDICO(2, "MEDICO"),
     ENFERMEIRO(3, "ENFERMEIRO"),
-    PACIENTE(4, "PACIENTE");
+    RECEPCIONISTA(4, "RECEPCIONISTA"),
+    PACIENTE(5, "PACIENTE");
 
     private final Integer id;
     private final String descricao;
