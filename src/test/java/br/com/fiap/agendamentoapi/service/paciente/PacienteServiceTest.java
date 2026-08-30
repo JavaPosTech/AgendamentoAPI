@@ -34,6 +34,8 @@ class PacienteServiceTest extends AbstractTest {
                 "Teste",
                 "Teste",
                 "12908734011",
+                "teste.salvar@email.com",
+                "(19) 98888-0001",
                 "Teste",
                 LocalDate.now())
         ));
@@ -45,6 +47,8 @@ class PacienteServiceTest extends AbstractTest {
                 "Nome Atualizado",
                 "Sobrenome Atualizado",
                 "09876543210",
+                "teste.atualizar@email.com",
+                "(19) 98888-0002",
                 "Teste Atualizado",
                 LocalDate.now())
         ));
@@ -56,6 +60,8 @@ class PacienteServiceTest extends AbstractTest {
                 "Nome Atualizado",
                 "Sobrenome Atualizado",
                 "0987654321",
+                "teste.inexistente@email.com",
+                "(19) 98888-0003",
                 "Teste Atualizado",
                 LocalDate.now())
         ));

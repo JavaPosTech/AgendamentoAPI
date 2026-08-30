@@ -2,6 +2,8 @@
   "nome": "Miguel",
   "sobrenome": "Correa",
   "cpf": "99999999998",
+  "email": "miguel.correa@email.com",
+  "telefone": "(19) 97777-0002",
   "endereco": "Rua das Flores, 100000",
   "dataNascimento": "15/03/2000"
 }

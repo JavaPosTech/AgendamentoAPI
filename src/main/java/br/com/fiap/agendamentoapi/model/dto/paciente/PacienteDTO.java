@@ -20,6 +20,10 @@ public record PacienteDTO(
 
         String cpf,
 
+        String email,
+
+        String telefone,
+
         String endereco,
 
         @JsonFormat(pattern = "dd/MM/yyyy")
@@ -36,6 +40,8 @@ public record PacienteDTO(
                 paciente.getNome(),
                 paciente.getSobrenome(),
                 paciente.getCpf(),
+                paciente.getEmail(),
+                paciente.getTelefone(),
                 paciente.getEndereco(),
                 paciente.getDataNascimento(),
                 paciente.getDataCadastro(),

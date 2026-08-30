@@ -4,6 +4,8 @@
   "nome": "Gustavo",
   "sobrenome": "Correa",
   "cpf": "12309845687",
+  "email": "gustavo.correa@email.com",
+  "telefone": "(19) 97777-0001",
   "endereco": "Rua das Palmeiras, 100",
   "dataNascimento": "01/01/2000"
 }

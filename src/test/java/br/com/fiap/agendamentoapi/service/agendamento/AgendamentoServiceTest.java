@@ -28,14 +28,16 @@ class AgendamentoServiceTest extends AbstractTest {
         Assertions.assertDoesNotThrow(() -> agendamentoService.salvar(new SalvarAgendamentoRequest(
                 1,
                 1,
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                "Primeira consulta do paciente."
         )));
     }
 
     @Test
     void atualizarTest() {
         Assertions.assertDoesNotThrow(() -> agendamentoService.atualizar(1, new AtualizarAgendamentoRequest(
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                "Consulta remarcada."
         )));
     }
 }

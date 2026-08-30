@@ -12,13 +12,60 @@
 
 ## 🧰 Ferramentas Utilizadas
 
-* 🛠️ Gradle
+* 🛠️ Gradle 9.7 (Kotlin DSL)
 
 * ☕️ Java 21
 
-* 🐘 Postgres 
+* 🐘 PostgreSQL 18
 
 * 🟢 Spring Boot 4.0.5
+
+* 🔐 Spring Security + JWT (jjwt)
+
+* 🦅 Flyway (versionamento do banco)
+
+* 🔄 MapStruct + Lombok
+
+* 📝 Log4j2
+
+* 📑 SpringDoc OpenAPI (Swagger UI)
+
+* 🧪 JUnit 5 + JaCoCo
+
+* 🐳 Docker / Docker Compose
+
+<br> 
+
+## 📁 Estrutura do Projeto
+
+O código é organizado **por camada e, dentro de cada camada, por domínio** (`paciente`, `medico`, `enfermeiro`, `recepcionista`, `agendamento`, `historicopaciente`, `usuario`, `auth`):
+
+```
+src/main/java/br/com/fiap/agendamentoapi/
+├── config/           # DataBaseConfig, SecurityConfig, SwaggerConfig e SecurityFilter
+├── controller/       # Endpoints REST
+├── service/          # Regras de negócio
+├── repository/       # Interfaces JpaRepository
+├── model/
+│   ├── entity/       # Entidades JPA
+│   ├── dto/          # Modelos de saída
+│   ├── request/      # Modelos de entrada
+│   ├── mapper/       # Mapeamentos MapStruct
+│   └── response/     # PageResponse, MensagemSucessoResponse, TokenResponse
+├── exceptions/       # Exceções de negócio e GlobalExceptionHandler
+└── enums/            # TipoUsuario, SituacaoCadastro
+
+src/main/resources/
+├── application.yaml              # Perfis dev, prod e test
+├── log4j2.xml                    # Console em dev; arquivo rotativo em prod
+└── db/migration/                 # Migrações Flyway (V1.0, V1.1, ...)
+```
+
+O esquema do banco é criado **exclusivamente pelo Flyway** — não há `ddl-auto`. Toda alteração de entidade exige uma nova migração `V<versão>__<Descrição>.sql`; migrações já aplicadas nunca devem ser editadas.
+
+> ℹ️ Os domínios `recepcionista` e `historicopaciente` existem hoje apenas como entidade, DTO e repositório — as tabelas fazem parte do schema da fase e são consumidas pela HistoricoAPI, mas ainda não há endpoints para elas nesta API.
+
+> ℹ️ O projeto **não utiliza Javadoc nem comentários explicativos** — nem no código Java, nem nos arquivos de build e de infraestrutura (`build.gradle.kts`, Compose, `Dockerfile`). A documentação dos modelos e das rotas fica nas anotações do SpringDoc (`@Schema`, `@Operation`), publicadas no Swagger UI, e todo o contexto de arquitetura, execução e infraestrutura neste `README.md`.
 
 <br> 
 
@@ -36,28 +83,84 @@
 
 <br> 
 
+🔹 `Testes de Integração`, executa toda a suíte de testes automatizados do projeto.
+
+<br> 
+
+Caso prefira o terminal, os mesmos comandos estão disponíveis via Gradle Wrapper:
+
+```bash
+# Build completo (com testes e relatório de cobertura)
+./gradlew build
+
+# Build sem testes
+./gradlew clean build -x test
+
+# Executar a suíte de testes
+./gradlew test
+
+# Executar a API no perfil desejado
+./gradlew bootRun --args="--spring.profiles.active=dev"
+```
+
+> ℹ️ No Windows, utilize `.\gradlew.bat` no lugar de `./gradlew`.
+
+<br> 
+
+## 🐳 Banco Compartilhado e Docker Compose
+
+Os microsserviços da Fase 3 compartilham **um único PostgreSQL**. O banco sobe de forma independente, cria a rede `shared-net`, e cada serviço se conecta a ela como rede externa:
+
+```
+                       ┌──────────────────────┐
+                       │   rede: shared-net   │
+                       │                      │
+   host:8745  ────────▶│  postgres:5432       │◀──── AgendamentoAPI  (host:9027)
+                       │                      │◀──── HistoricoAPI    (host:9028)
+                       └──────────────────────┘
+```
+
+Dentro da rede, o banco é sempre alcançado pelo hostname **`postgres`** na porta interna **`5432`**. A porta `8745` é apenas a exposição no host, para acesso via IDE ou cliente SQL.
+
+O projeto disponibiliza três arquivos Compose:
+
+| Arquivo | Finalidade |
+| --- | --- |
+| `docker-compose-postgres-dev.yml` | PostgreSQL de desenvolvimento, com credenciais fixas e sem dependência do `.env`. |
+| `docker-compose-postgres-prod.yml` | PostgreSQL de produção: lê o `.env`, possui *healthcheck* e cria a rede `shared-net`. |
+| `docker-compose-agendamentoapi.yml` | Apenas a API, no perfil `prod`, conectando-se à `shared-net` já existente. |
+
+> ℹ️ Os dois arquivos do PostgreSQL são **idênticos aos da HistoricoAPI** e utilizam nome de projeto e de volume fixos. Isso significa que tanto faz de qual projeto o banco é iniciado: o container e os dados serão sempre os mesmos. Suba o banco **uma vez**, a partir de qualquer um dos repositórios.
+
+> ⭐ **Este é o serviço dono do schema.** As migrations Flyway em `src/main/resources/db/migration/` criam todas as tabelas da fase e inserem a carga inicial de dados. Os demais microsserviços apenas consomem esse schema, portanto a AgendamentoAPI deve ser a **primeira** a subir contra um banco novo.
+
+<br> 
+
 ## 🛠️ Desenvolvimento 
 
-Para o ambiente de desenvolvimento, o projeto disponibiliza o arquivo `docker-compose-postgres.yml`, já configurado com todas as variáveis necessárias para conexão com o banco de dados. 
+Para o ambiente de desenvolvimento, o projeto disponibiliza o arquivo `docker-compose-postgres-dev.yml`, já configurado com todas as credenciais necessárias para conexão com o banco de dados, sem exigir nenhuma configuração adicional.
 
 Para iniciar o serviço do PostgreSQL, execute no terminal: 
 
 ```bash
-docker compose -f docker-compose-postgres.yml up -d
+docker compose -f docker-compose-postgres-dev.yml up -d --wait
 ```
 
 Em seguida, execute a aplicação utilizando a opção `BootRun - DEV`. Dessa forma, a API será conectada automaticamente ao banco de dados configurado no Docker Compose, facilitando a execução do projeto em ambiente local e ficando disponível na porta `9017`.
+
+Na primeira execução o Flyway aplica as migrations e cria todo o schema — a partir daí os demais microsserviços da fase já conseguem ler os dados.
+
+> ℹ️ A conexão com o banco é montada em `DataBaseConfig` a partir das variáveis `DATABASE_IP`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER` e `DATABASE_PASSWORD`. As configurações de execução do IntelliJ (`.run/`) já definem esses valores; ao rodar pelo terminal, exporte-os antes de iniciar a aplicação.
+
+> ℹ️ Ao rodar localmente pela IDE, a aplicação acessa o banco em `localhost:8745`. O valor `5432` só é utilizado pelos containers, que enxergam o PostgreSQL pela rede interna do Docker.
 
 <br> 
 
 ## 🚀 Produção
 
-Para execução em ambiente de produção, o projeto disponibiliza o arquivo `docker-compose-agendamentoapi.yml`. Antes de iniciar a aplicação, é necessário configurar o arquivo `.env` com as variáveis de conexão do banco de dados, conforme o ambiente desejado:
+Para execução em ambiente de produção, o projeto disponibiliza os arquivos `docker-compose-postgres-prod.yml` e `docker-compose-agendamentoapi.yml`. Antes de iniciar a aplicação, é necessário configurar o arquivo `.env` na raiz do projeto:
 
 ```bash
-# DATABASE_PORT
-$ Exemplo: 5432
-
 # DATABASE_NAME
 $ Exemplo: postgres
 
@@ -74,35 +177,27 @@ $ Exemplo: uma string aleatória com pelo menos 32 caracteres
 $ Exemplo: 86400000 (24 horas)
 ```
 
-> ℹ️ Importante: a variável `DATABASE_PORT` representa a porta utilizada pela aplicação para se conectar ao banco de dados dentro da rede interna do Docker.
-O valor padrão é `5432`. Caso deseje alterar essa porta no arquivo  `.env`, também será necessário ajustar o arquivo `docker-compose-agendamentoapi.yml`, atualizando a porta interna do container PostgreSQL para o mesmo valor configurado.
+As variáveis `DATABASE_*` são utilizadas tanto para **criar** o container do PostgreSQL quanto para a API se **conectar** a ele, de modo que as credenciais não têm como divergir. Se `DATABASE_PASSWORD` ou `JWT_SECRET` não estiverem preenchidas, o Compose interrompe a execução com uma mensagem explícita, em vez de subir com valores em branco.
 
-```yaml
-ports:
-  - "8745:5432"
-```
+> ⚠️ `JWT_SECRET` e `JWT_EXPIRATION_MS` possuem valores padrão embutidos no código apenas para facilitar o desenvolvimento local. Em produção, defina obrigatoriamente um `JWT_SECRET` próprio — o valor padrão é público, pois está versionado no repositório.
 
-Se alterar `DATABASE_PORT` para `5433`, o mapeamento deverá ser ajustado para:
-
-```yaml
-ports:
-  - "8745:5433"
-```
-
-Nesse exemplo:
-
-* `8745` = porta externa utilizada pelo host para acessar o banco
-* `5432` ou `5433` = porta interna utilizada pela API para se conectar ao PostgreSQL
+> ℹ️ Não é necessário configurar a porta do banco: dentro da rede `shared-net` a conexão é sempre feita em `postgres:5432`, valor já fixado nos arquivos Compose.
 
 <br> 
 
-Após configurar o arquivo `.env` com as variáveis de conexão do banco de dados, execute no terminal:
+Após configurar o arquivo `.env`, inicie primeiro o banco de dados e, em seguida, a API:
 
 ```bash
+# 1. PostgreSQL — também cria a rede shared-net (execute apenas uma vez)
+docker compose -f docker-compose-postgres-prod.yml up -d --wait
+
+# 2. AgendamentoAPI — aplica as migrations Flyway e cria o schema
 docker compose -f docker-compose-agendamentoapi.yml up -d
 ```
 
 Dessa forma, a API será iniciada utilizando as variáveis definidas no arquivo `.env` e ficará disponível na porta `9027`.
+
+> ℹ️ Os demais microsserviços da fase entram na mesma rede e utilizam portas distintas no host — a HistoricoAPI, por exemplo, é publicada em `9028`. Todos escutam em `9027` dentro do próprio container, então chamadas entre containers usam o nome do container e a porta interna (ex.: `http://AgendamentoAPI:9027`).
 
 > ℹ️ Quando a API é executada em produção, é criada automaticamente uma pasta chamada `logs` no diretório onde a aplicação está sendo executada. Essa pasta é responsável por armazenar todos os logs gerados pela API, sendo organizados de forma diária, ou seja, a cada novo dia é gerado um arquivo específico contendo a data correspondente, facilitando a rastreabilidade e análise das execuções. Além disso, a aplicação possui uma política de limpeza automática, na qual os arquivos de `logs` são mantidos por um período de 30 dias. Após esse prazo, os `logs` mais antigos são excluídos automaticamente, garantindo melhor gerenciamento de armazenamento.
 
@@ -146,13 +241,46 @@ Para fazer login, você sempre usa a senha **em texto puro** que foi escolhida n
 
 <br>
 
+## 🌐 Endpoints
+
+Todas as rotas abaixo são relativas ao context path **`/AgendamentoAPI`**.
+
+| Método   | Rota                  | Autenticação | Descrição                                        |
+| -------- | --------------------- | ------------ | ------------------------------------------------ |
+| `POST`   | `/v1/auth/login`      | Pública      | Autentica o usuário e devolve o token JWT        |
+| `GET`    | `/v1/medico`          | Requerida    | Lista os médicos (paginado)                      |
+| `POST`   | `/v1/medico`          | Pública      | Cadastra um médico                               |
+| `PATCH`  | `/v1/medico/{id}`     | Requerida    | Atualiza os dados de um médico                   |
+| `DELETE` | `/v1/medico/{id}`     | Requerida    | Exclui logicamente um médico                     |
+| `GET`    | `/v1/enfermeiro`      | Requerida    | Lista os enfermeiros (paginado)                  |
+| `POST`   | `/v1/enfermeiro`      | Pública      | Cadastra um enfermeiro                           |
+| `PATCH`  | `/v1/enfermeiro/{id}` | Requerida    | Atualiza os dados de um enfermeiro               |
+| `DELETE` | `/v1/enfermeiro/{id}` | Requerida    | Exclui logicamente um enfermeiro                 |
+| `GET`    | `/v1/paciente`        | Requerida    | Lista os pacientes (paginado)                    |
+| `POST`   | `/v1/paciente`        | Pública      | Cadastra um paciente                             |
+| `PATCH`  | `/v1/paciente/{id}`   | Requerida    | Atualiza os dados de um paciente                 |
+| `DELETE` | `/v1/paciente/{id}`   | Requerida    | Exclui logicamente um paciente                   |
+| `GET`    | `/v1/agendamento`     | Requerida    | Lista as consultas agendadas (paginado)          |
+| `POST`   | `/v1/agendamento`     | Requerida    | Agenda uma nova consulta                         |
+| `PATCH`  | `/v1/agendamento/{id}`| Requerida    | Atualiza a data/hora e a observação de uma consulta |
+
+> ℹ️ O `PATCH` é uma **atualização parcial**: envie somente os campos que deseja alterar — os ausentes preservam o valor atual. Em contrapartida, o Jackson está em modo estrito, então um campo **desconhecido** no JSON derruba a requisição com `400`.
+
+> ℹ️ O cadastro de paciente exige, além dos dados pessoais, `email` (único e validado) e `telefone`. O agendamento aceita um campo opcional `observacao`.
+
+> ℹ️ A exclusão é **lógica**: o registro não é removido do banco, apenas tem sua situação de cadastro alterada para `EXCLUIDO`.
+
+> ℹ️ As listagens são paginadas e a numeração começa em **1**. Utilize os parâmetros `page`, `size` e `sort` (por exemplo, `/v1/paciente?page=1&size=20&sort=nome`).
+
+<br> 
+
 ## 📑 Swagger
 
 Para acessar a documentação da API, inicie a aplicação utilizando a opção `BootRun - DEV` e acesse o link abaixo no seu navegador.
 
 ```bash
 # URL para acessar a documentação da API 
-$ http://localhost:9017/agendamentoapi/swagger-ui/index.html
+$ http://localhost:9017/AgendamentoAPI/swagger-ui/index.html
 ```
 
 <br> 
@@ -161,8 +289,35 @@ Caso inicie a aplicação utilizando a opção `BootRun - PROD` e acesse o link 
 
 ```bash
 # URL para acessar a documentação da API 
-$ http://localhost:9027/agendamentoapi/swagger-ui/index.html
+$ http://localhost:9027/AgendamentoAPI/swagger-ui/index.html
 ```
+
+> ⚠️ O context path diferencia maiúsculas de minúsculas: utilize `/AgendamentoAPI`, e não `/agendamentoapi`.
+
+<br> 
+
+## 🧪 Testes
+
+A suíte de testes é composta por **testes de integração reais**: eles sobem o contexto do Spring e se conectam a um PostgreSQL de verdade. Por isso, **o banco precisa estar no ar antes de executar os testes**:
+
+```bash
+docker compose -f docker-compose-postgres-dev.yml up -d --wait
+./gradlew test
+```
+
+Os testes utilizam o perfil `test`, que carrega a configuração de banco de `TestDataBaseConfig` (com valores padrão apontando para `localhost:8745`) e executam dentro de transações revertidas ao final de cada caso. Os payloads das requisições dos testes de controller ficam em `src/test/resources/<dominio>/`, lidos por caminho relativo — portanto, execute os testes a partir da raiz do projeto.
+
+Ao final da execução, o **JaCoCo** gera o relatório de cobertura em:
+
+```bash
+build/reports/jacoco/test/html/index.html
+```
+
+<br> 
+
+## 🔄 Integração Contínua
+
+O workflow em `.github/workflows/workflow.yml` é acionado a cada Pull Request aberto contra a branch `main`. Ele sobe um container PostgreSQL, configura o Java 21 e executa `./gradlew build`, garantindo que a compilação e os testes automatizados passem antes do merge.
 
 <br> 
 

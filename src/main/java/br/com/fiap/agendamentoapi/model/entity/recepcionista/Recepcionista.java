@@ -1,18 +1,17 @@
-package br.com.fiap.agendamentoapi.model.entity.paciente;
+package br.com.fiap.agendamentoapi.model.entity.recepcionista;
 
 import br.com.fiap.agendamentoapi.model.entity.situacaocadastro.SituacaoCadastro;
 import br.com.fiap.agendamentoapi.model.entity.usuario.Usuario;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "paciente", schema = "public")
-public class Paciente {
+@Table(name = "recepcionista", schema = "public")
+public class Recepcionista {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,21 +26,6 @@ public class Paciente {
 
     @Column(nullable = false, length = 100)
     private String sobrenome;
-
-    @Column(nullable = false, unique = true, length = 11)
-    private String cpf;
-
-    @Column(nullable = false, unique = true, length = 100)
-    private String email;
-
-    @Column(nullable = false, length = 15)
-    private String telefone;
-
-    @Column(nullable = false, length = 255)
-    private String endereco;
-
-    @Column(name = "data_nascimento", nullable = false)
-    private LocalDate dataNascimento;
 
     @Column(name = "data_cadastro", nullable = false)
     private LocalDateTime dataCadastro;

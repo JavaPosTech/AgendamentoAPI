@@ -1,24 +1,24 @@
 package br.com.fiap.agendamentoapi.model.request.medico;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
-@Schema(description = "Representa o modelo de requisição para atualizar um Médico.")
+@Schema(description = "Representa o modelo de requisição para atualizar um Médico. Os campos são opcionais: os que forem omitidos mantêm o valor atual.")
 public record AtualizarMedicoRequest(
 
-        @NotBlank(message = "O campo 'nome' é obrigatório!")
+        @Pattern(regexp = ".*\\S.*", message = "O campo 'nome' não pode ser vazio!")
         String nome,
 
-        @NotBlank(message = "O campo 'sobrenome' é obrigatório!")
+        @Pattern(regexp = ".*\\S.*", message = "O campo 'sobrenome' não pode ser vazio!")
         String sobrenome,
 
-        @NotBlank(message = "O campo 'crm' é obrigatório!")
+        @Pattern(regexp = ".*\\S.*", message = "O campo 'crm' não pode ser vazio!")
         String crm,
 
-        @NotBlank(message = "O campo 'especialidade' é obrigatório!")
+        @Pattern(regexp = ".*\\S.*", message = "O campo 'especialidade' não pode ser vazio!")
         String especialidade,
 
-        @NotBlank(message = "O campo 'endereco' é obrigatório!")
+        @Pattern(regexp = ".*\\S.*", message = "O campo 'endereco' não pode ser vazio!")
         String endereco
 
 ) {}

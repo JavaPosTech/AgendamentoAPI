@@ -1,0 +1,38 @@
+name: fiap-fase3
+
+services:
+  postgres:
+    image: postgres:18
+    container_name: postgres-fase3
+
+    environment:
+      TZ: America/Sao_Paulo
+
+      POSTGRES_DB: ${DATABASE_NAME:-postgres}
+      POSTGRES_USER: ${DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?defina DATABASE_PASSWORD no arquivo .env}
+
+    ports:
+      - "8745:5432"
+
+    volumes:
+      - postgres-data:/var/lib/postgresql
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-postgres} -d ${DATABASE_NAME:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    restart: always
+
+    networks:
+      - shared-net
+
+volumes:
+  postgres-data:
+    name: fiap-postgres-data
+
+networks:
+  shared-net:
+    name: shared-net
