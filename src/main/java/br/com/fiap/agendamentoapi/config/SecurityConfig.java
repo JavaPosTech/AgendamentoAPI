@@ -1,7 +1,7 @@
 package br.com.fiap.agendamentoapi.config;
 
-import br.com.fiap.agendamentoapi.exceptions.handler.GlobalExceptionHandler;
 import br.com.fiap.agendamentoapi.config.security.SecurityFilter;
+import br.com.fiap.agendamentoapi.exceptions.handler.GlobalExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

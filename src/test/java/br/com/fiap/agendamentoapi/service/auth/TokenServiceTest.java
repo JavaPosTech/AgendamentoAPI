@@ -32,54 +32,32 @@ class TokenServiceTest {
 
     @Test
     void gerarEValidarTokenTest() {
-
         var usuario = criarUsuario();
-
         var token = tokenService.gerarToken(usuario);
 
         Assertions.assertNotNull(token);
         Assertions.assertFalse(token.isBlank());
 
         var login = tokenService.validarToken(token);
-
-        Assertions.assertEquals(
-                "usuario.teste",
-                login
-        );
+        Assertions.assertEquals("usuario.teste", login);
     }
 
     @Test
     void validarTokenInvalidoTest() {
-
-        Assertions.assertThrows(
-                JwtException.class,
-                () -> tokenService.validarToken(
-                        "token-invalido"
-                )
-        );
+        Assertions.assertThrows(JwtException.class, () -> tokenService.validarToken("token-invalido"));
     }
 
     @Test
     void validarTokenExpiradoTest() {
-
-        ReflectionTestUtils.setField(
-                tokenService,
-                "expirationMs",
-                -1000L
-        );
+        ReflectionTestUtils.setField(tokenService, "expirationMs", -1000L);
 
         var usuario = criarUsuario();
-
         var token = tokenService.gerarToken(usuario);
 
-        Assertions.assertThrows(
-                JwtException.class,
-                () -> tokenService.validarToken(token)
-        );
+        Assertions.assertThrows(JwtException.class, () -> tokenService.validarToken(token));
     }
 
     private Usuario criarUsuario() {
-
         var tipoUsuario = new TipoUsuario();
         tipoUsuario.setId(1);
         tipoUsuario.setDescricao("ADMINISTRADOR");

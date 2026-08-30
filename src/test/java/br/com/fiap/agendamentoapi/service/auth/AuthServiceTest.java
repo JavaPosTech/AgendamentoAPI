@@ -20,25 +20,21 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
+    @InjectMocks
+    private AuthService authService;
+
     @Mock
-    private UsuarioRepository usuarioRepository;
+    private TokenService tokenService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private TokenService tokenService;
-
-    @InjectMocks
-    private AuthService authService;
+    private UsuarioRepository usuarioRepository;
 
     @Test
     void loginTest() {
-
-        var request = new LoginRequest(
-                "usuario.teste",
-                "Senha@123"
-        );
+        var request = new LoginRequest("usuario.teste", "Senha@123");
 
         var usuario = new Usuario();
         usuario.setId(1);
@@ -56,53 +52,32 @@ class AuthServiceTest {
         when(tokenService.gerarToken(usuario))
                 .thenReturn("token-jwt-teste");
 
-        var token = Assertions.assertDoesNotThrow(
-                () -> authService.login(request)
-        );
+        var token = Assertions.assertDoesNotThrow(() -> authService.login(request));
 
         Assertions.assertNotNull(token);
         Assertions.assertEquals("token-jwt-teste", token);
 
         verify(usuarioRepository).findByLogin("usuario.teste");
-
-        verify(passwordEncoder).matches(
-                "Senha@123",
-                "senha-criptografada"
-        );
-
+        verify(passwordEncoder).matches("Senha@123", "senha-criptografada");
         verify(tokenService).gerarToken(usuario);
     }
 
     @Test
     void loginComUsuarioInexistenteTest() {
-
-        var request = new LoginRequest(
-                "usuario.inexistente",
-                "Senha@123"
-        );
+        var request = new LoginRequest("usuario.inexistente", "Senha@123");
 
         when(usuarioRepository.findByLogin("usuario.inexistente"))
                 .thenReturn(Optional.empty());
 
-        Assertions.assertThrows(
-                UsuarioNaoEncontradoException.class,
-                () -> authService.login(request)
-        );
-
-        verify(usuarioRepository)
-                .findByLogin("usuario.inexistente");
-
+        Assertions.assertThrows(UsuarioNaoEncontradoException.class, () -> authService.login(request));
+        verify(usuarioRepository).findByLogin("usuario.inexistente");
         verifyNoInteractions(passwordEncoder);
         verifyNoInteractions(tokenService);
     }
 
     @Test
     void loginComSenhaIncorretaTest() {
-
-        var request = new LoginRequest(
-                "usuario.teste",
-                "senha-errada"
-        );
+        var request = new LoginRequest("usuario.teste", "senha-errada");
 
         var usuario = new Usuario();
         usuario.setId(1);
@@ -117,19 +92,9 @@ class AuthServiceTest {
                 "senha-criptografada"
         )).thenReturn(false);
 
-        Assertions.assertThrows(
-                SenhaIncorretaException.class,
-                () -> authService.login(request)
-        );
-
-        verify(usuarioRepository)
-                .findByLogin("usuario.teste");
-
-        verify(passwordEncoder).matches(
-                "senha-errada",
-                "senha-criptografada"
-        );
-
+        Assertions.assertThrows(SenhaIncorretaException.class, () -> authService.login(request));
+        verify(usuarioRepository).findByLogin("usuario.teste");
+        verify(passwordEncoder).matches("senha-errada", "senha-criptografada");
         verifyNoInteractions(tokenService);
     }
 }

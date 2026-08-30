@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-@WithMockUser(roles = "ADMINISTRADOR")
 @SpringBootTest
+@WithMockUser(roles = "ADMINISTRADOR")
 class RecepcionistaControllerTest extends AbstractControllerTest {
 
     private String salvarRecepcionistaRequest;
