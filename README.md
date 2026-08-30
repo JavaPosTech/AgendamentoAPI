@@ -12,27 +12,27 @@
 
 ## 🧰 Ferramentas Utilizadas
 
-* 🛠️ Gradle 9.7 (Kotlin DSL)
-
 * ☕️ Java 21
 
-* 🐘 PostgreSQL 18
-
-* 🟢 Spring Boot 4.0.5
-
-* 🔐 Spring Security + JWT (jjwt)
-
-* 🦅 Flyway (versionamento do banco)
-
-* 🔄 MapStruct + Lombok
+* 🦅 Flyway
 
 * 📝 Log4j2
 
-* 📑 SpringDoc OpenAPI (Swagger UI)
+* 🐘 PostgreSQL 18
 
 * 🧪 JUnit 5 + JaCoCo
 
+* 🟢 Spring Boot 4.0.5
+
+* 🔄 MapStruct + Lombok
+
+* 🔐 Spring Security + JWT
+
+* 🛠️ Gradle 9.7 (Kotlin DSL)
+
 * 🐳 Docker / Docker Compose
+
+* 📑 SpringDoc OpenAPI (Swagger UI)
 
 <br> 
 

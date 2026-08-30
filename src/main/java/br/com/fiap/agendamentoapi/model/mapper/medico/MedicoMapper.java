@@ -3,6 +3,7 @@ package br.com.fiap.agendamentoapi.model.mapper.medico;
 import br.com.fiap.agendamentoapi.model.entity.medico.Medico;
 import br.com.fiap.agendamentoapi.model.request.medico.AtualizarMedicoRequest;
 import br.com.fiap.agendamentoapi.model.request.medico.SalvarMedicoRequest;
+import org.mapstruct.Condition;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -10,6 +11,11 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface MedicoMapper {
+
+    @Condition
+    default boolean preenchido(String valor) {
+        return valor != null && !valor.isBlank();
+    }
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "usuario", ignore = true)
