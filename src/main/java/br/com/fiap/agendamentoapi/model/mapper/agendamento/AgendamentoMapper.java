@@ -14,6 +14,7 @@ public interface AgendamentoMapper {
     @Mapping(target = "medico", source = "medico")
     @Mapping(target = "paciente", source = "paciente")
     @Mapping(target = "dataHoraConsulta", source = "request.dataHoraConsulta")
+    @Mapping(target = "observacao", source = "request.observacao")
     @Mapping(target = "dataCadastro", expression = "java(java.time.LocalDateTime.now())")
     Agendamento toEntity(SalvarAgendamentoRequest request, Medico medico, Paciente paciente);
 

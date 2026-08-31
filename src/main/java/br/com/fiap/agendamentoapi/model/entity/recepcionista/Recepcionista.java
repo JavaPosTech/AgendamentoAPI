@@ -5,7 +5,6 @@ import br.com.fiap.agendamentoapi.model.entity.usuario.Usuario;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -34,4 +33,5 @@ public class Recepcionista {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_situacaocadastro", nullable = false)
     private SituacaoCadastro situacaoCadastro;
+
 }

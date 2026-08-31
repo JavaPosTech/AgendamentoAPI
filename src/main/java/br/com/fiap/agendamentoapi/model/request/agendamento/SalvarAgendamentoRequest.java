@@ -15,6 +15,8 @@ public record SalvarAgendamentoRequest(
         Integer pacienteId,
 
         @JsonFormat(pattern = "dd/MM/yyyy - HH:mm:ss")
-        LocalDateTime dataHoraConsulta
+        LocalDateTime dataHoraConsulta,
+
+        String observacao
 
 ) {}

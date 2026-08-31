@@ -33,4 +33,5 @@ public class HistoricoPaciente {
 
     @Column(columnDefinition = "TEXT")
     private String observacoes;
+
 }

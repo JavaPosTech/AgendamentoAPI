@@ -12,19 +12,60 @@
 
 ## 🧰 Ferramentas Utilizadas
 
-* 🛠️ Gradle
+* ☕️ Java 21
 
 * 🦅 Flyway
 
-* ☕️ Java 21
+* 📝 Log4j2
 
-* 🐘 Postgres
+* 🐘 PostgreSQL 18
 
 * 🧪 JUnit 5 + JaCoCo
 
 * 🟢 Spring Boot 4.0.5
 
+* 🔄 MapStruct + Lombok
+
 * 🔐 Spring Security + JWT
+
+* 🛠️ Gradle 9.7 (Kotlin DSL)
+
+* 🐳 Docker / Docker Compose
+
+* 📑 SpringDoc OpenAPI (Swagger UI)
+
+<br> 
+
+## 📁 Estrutura do Projeto
+
+O código é organizado **por camada e, dentro de cada camada, por domínio** (`paciente`, `medico`, `enfermeiro`, `recepcionista`, `agendamento`, `historicopaciente`, `usuario`, `auth`):
+
+```
+src/main/java/br/com/fiap/agendamentoapi/
+├── config/           # DataBaseConfig, SecurityConfig, SwaggerConfig e SecurityFilter
+├── controller/       # Endpoints REST
+├── service/          # Regras de negócio
+├── repository/       # Interfaces JpaRepository
+├── model/
+│   ├── entity/       # Entidades JPA
+│   ├── dto/          # Modelos de saída
+│   ├── request/      # Modelos de entrada
+│   ├── mapper/       # Mapeamentos MapStruct
+│   └── response/     # PageResponse, MensagemSucessoResponse, TokenResponse
+├── exceptions/       # Exceções de negócio e GlobalExceptionHandler
+└── enums/            # TipoUsuario, SituacaoCadastro
+
+src/main/resources/
+├── application.yaml              # Perfis dev, prod e test
+├── log4j2.xml                    # Console em dev; arquivo rotativo em prod
+└── db/migration/                 # Migrações Flyway (V1.0, V1.1, ...)
+```
+
+O esquema do banco é criado **exclusivamente pelo Flyway** — não há `ddl-auto`. Toda alteração de entidade exige a alteração da migração correspondente: enquanto o projeto está em desenvolvimento, coluna nova entra direto no `CREATE TABLE` da `V1.0` e dado de apoio na `V1.1`, em vez de ganhar uma versão nova. Como isso muda o checksum, o caminho esperado é recriar o schema do zero.
+
+> ℹ️ Todos os domínios possuem a fatia vertical completa (entidade, repositório, mapper, request/DTO, service e controller). As tabelas `recepcionista` e `historico_paciente` fazem parte do schema da fase e também são consumidas pela HistoricoAPI.
+
+> ℹ️ O projeto **não utiliza Javadoc nem comentários explicativos** — nem no código Java, nem nos arquivos de build e de infraestrutura (`build.gradle.kts`, Compose, `Dockerfile`). A documentação dos modelos e das rotas fica nas anotações do SpringDoc (`@Schema`, `@Operation`), publicadas no Swagger UI, e todo o contexto de arquitetura, execução e infraestrutura neste `README.md`.
 
 <br> 
 
@@ -42,28 +83,84 @@
 
 <br> 
 
+🔹 `Testes de Integração`, executa toda a suíte de testes automatizados do projeto.
+
+<br> 
+
+Caso prefira o terminal, os mesmos comandos estão disponíveis via Gradle Wrapper:
+
+```bash
+# Build completo (com testes e relatório de cobertura)
+./gradlew build
+
+# Build sem testes
+./gradlew clean build -x test
+
+# Executar a suíte de testes
+./gradlew test
+
+# Executar a API no perfil desejado
+./gradlew bootRun --args="--spring.profiles.active=dev"
+```
+
+> ℹ️ No Windows, utilize `.\gradlew.bat` no lugar de `./gradlew`.
+
+<br> 
+
+## 🐳 Banco Compartilhado e Docker Compose
+
+Os microsserviços da Fase 3 compartilham **um único PostgreSQL**. O banco sobe de forma independente, cria a rede `shared-net`, e cada serviço se conecta a ela como rede externa:
+
+```
+                       ┌──────────────────────┐
+                       │   rede: shared-net   │
+                       │                      │
+   host:8745  ────────▶│  postgres:5432       │◀──── AgendamentoAPI  (host:9027)
+                       │                      │◀──── HistoricoAPI    (host:9028)
+                       └──────────────────────┘
+```
+
+Dentro da rede, o banco é sempre alcançado pelo hostname **`postgres`** na porta interna **`5432`**. A porta `8745` é apenas a exposição no host, para acesso via IDE ou cliente SQL.
+
+O projeto disponibiliza três arquivos Compose:
+
+| Arquivo | Finalidade |
+| --- | --- |
+| `docker-compose-postgres-dev.yml` | PostgreSQL de desenvolvimento, com credenciais fixas e sem dependência do `.env`. |
+| `docker-compose-postgres-prod.yml` | PostgreSQL de produção: lê o `.env`, possui *healthcheck* e cria a rede `shared-net`. |
+| `docker-compose-agendamentoapi.yml` | Apenas a API, no perfil `prod`, conectando-se à `shared-net` já existente. |
+
+> ℹ️ Os dois arquivos do PostgreSQL são **idênticos aos da HistoricoAPI** e utilizam nome de projeto e de volume fixos. Isso significa que tanto faz de qual projeto o banco é iniciado: o container e os dados serão sempre os mesmos. Suba o banco **uma vez**, a partir de qualquer um dos repositórios.
+
+> ⭐ **Este é o serviço dono do schema.** As migrations Flyway em `src/main/resources/db/migration/` criam todas as tabelas da fase e inserem a carga inicial de dados. Os demais microsserviços apenas consomem esse schema, portanto a AgendamentoAPI deve ser a **primeira** a subir contra um banco novo.
+
+<br> 
+
 ## 🛠️ Desenvolvimento 
 
-Para o ambiente de desenvolvimento, o projeto disponibiliza o arquivo `docker-compose-postgres.yml`, já configurado com todas as variáveis necessárias para conexão com o banco de dados. 
+Para o ambiente de desenvolvimento, o projeto disponibiliza o arquivo `docker-compose-postgres-dev.yml`, já configurado com todas as credenciais necessárias para conexão com o banco de dados, sem exigir nenhuma configuração adicional.
 
 Para iniciar o serviço do PostgreSQL, execute no terminal: 
 
 ```bash
-docker compose -f docker-compose-postgres.yml up -d
+docker compose -f docker-compose-postgres-dev.yml up -d --wait
 ```
 
 Em seguida, execute a aplicação utilizando a opção `BootRun - DEV`. Dessa forma, a API será conectada automaticamente ao banco de dados configurado no Docker Compose, facilitando a execução do projeto em ambiente local e ficando disponível na porta `9017`.
+
+Na primeira execução o Flyway aplica as migrations e cria todo o schema — a partir daí os demais microsserviços da fase já conseguem ler os dados.
+
+> ℹ️ A conexão com o banco é montada em `DataBaseConfig` a partir das variáveis `DATABASE_IP`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER` e `DATABASE_PASSWORD`. As configurações de execução do IntelliJ (`.run/`) já definem esses valores; ao rodar pelo terminal, exporte-os antes de iniciar a aplicação.
+
+> ℹ️ Ao rodar localmente pela IDE, a aplicação acessa o banco em `localhost:8745`. O valor `5432` só é utilizado pelos containers, que enxergam o PostgreSQL pela rede interna do Docker.
 
 <br> 
 
 ## 🚀 Produção
 
-Para execução em ambiente de produção, o projeto disponibiliza o arquivo `docker-compose-agendamentoapi.yml`. Antes de iniciar a aplicação, é necessário configurar o arquivo `.env` com as variáveis de conexão do banco de dados, conforme o ambiente desejado:
+Para execução em ambiente de produção, o projeto disponibiliza os arquivos `docker-compose-postgres-prod.yml` e `docker-compose-agendamentoapi.yml`. Antes de iniciar a aplicação, é necessário configurar o arquivo `.env` na raiz do projeto:
 
 ```bash
-# DATABASE_PORT
-$ Exemplo: 5432
-
 # DATABASE_NAME
 $ Exemplo: postgres
 
@@ -80,35 +177,27 @@ $ Exemplo: uma string aleatória com pelo menos 32 caracteres
 $ Exemplo: 86400000 (24 horas)
 ```
 
-> ℹ️ Importante: a variável `DATABASE_PORT` representa a porta utilizada pela aplicação para se conectar ao banco de dados dentro da rede interna do Docker.
-O valor padrão é `5432`. Caso deseje alterar essa porta no arquivo  `.env`, também será necessário ajustar o arquivo `docker-compose-agendamentoapi.yml`, atualizando a porta interna do container PostgreSQL para o mesmo valor configurado.
+As variáveis `DATABASE_*` são utilizadas tanto para **criar** o container do PostgreSQL quanto para a API se **conectar** a ele, de modo que as credenciais não têm como divergir. Se `DATABASE_PASSWORD` ou `JWT_SECRET` não estiverem preenchidas, o Compose interrompe a execução com uma mensagem explícita, em vez de subir com valores em branco.
 
-```yaml
-ports:
-  - "8745:5432"
-```
+> ⚠️ `JWT_SECRET` e `JWT_EXPIRATION_MS` possuem valores padrão embutidos no código apenas para facilitar o desenvolvimento local. Em produção, defina obrigatoriamente um `JWT_SECRET` próprio — o valor padrão é público, pois está versionado no repositório.
 
-Se alterar `DATABASE_PORT` para `5433`, o mapeamento deverá ser ajustado para:
-
-```yaml
-ports:
-  - "8745:5433"
-```
-
-Nesse exemplo:
-
-* `8745` = porta externa utilizada pelo host para acessar o banco
-* `5432` ou `5433` = porta interna utilizada pela API para se conectar ao PostgreSQL
+> ℹ️ Não é necessário configurar a porta do banco: dentro da rede `shared-net` a conexão é sempre feita em `postgres:5432`, valor já fixado nos arquivos Compose.
 
 <br> 
 
-Após configurar o arquivo `.env` com as variáveis de conexão do banco de dados, execute no terminal:
+Após configurar o arquivo `.env`, inicie primeiro o banco de dados e, em seguida, a API:
 
 ```bash
+# 1. PostgreSQL — também cria a rede shared-net (execute apenas uma vez)
+docker compose -f docker-compose-postgres-prod.yml up -d --wait
+
+# 2. AgendamentoAPI — aplica as migrations Flyway e cria o schema
 docker compose -f docker-compose-agendamentoapi.yml up -d
 ```
 
 Dessa forma, a API será iniciada utilizando as variáveis definidas no arquivo `.env` e ficará disponível na porta `9027`.
+
+> ℹ️ Os demais microsserviços da fase entram na mesma rede e utilizam portas distintas no host — a HistoricoAPI, por exemplo, é publicada em `9028`. Todos escutam em `9027` dentro do próprio container, então chamadas entre containers usam o nome do container e a porta interna (ex.: `http://AgendamentoAPI:9027`).
 
 > ℹ️ Quando a API é executada em produção, é criada automaticamente uma pasta chamada `logs` no diretório onde a aplicação está sendo executada. Essa pasta é responsável por armazenar todos os logs gerados pela API, sendo organizados de forma diária, ou seja, a cada novo dia é gerado um arquivo específico contendo a data correspondente, facilitando a rastreabilidade e análise das execuções. Além disso, a aplicação possui uma política de limpeza automática, na qual os arquivos de `logs` são mantidos por um período de 30 dias. Após esse prazo, os `logs` mais antigos são excluídos automaticamente, garantindo melhor gerenciamento de armazenamento.
 
@@ -138,34 +227,7 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiJ9...
 
 O token expira em 24 horas (configurável via `JWT_EXPIRATION_MS`). Após expirar, é necessário realizar login novamente.
 
-> ⚠️ Cadastro (`POST`) de Médico, Paciente e Enfermeiro **não exige token** (autocadastro livre). Todas as demais operações — listar, atualizar e excluir — exigem um usuário autenticado.
-
-<br>
-
-### Perfis de acesso
-
-Cada usuário pertence a um **tipo** (`ADMINISTRADOR`, `MEDICO`, `ENFERMEIRO`, `RECEPCIONISTA` ou `PACIENTE`), que é gravado no token no momento do login e transformado na `role` usada pelo Spring Security. As regras aplicadas hoje são:
-
-| Rotas | Quem pode acessar |
-| --- | --- |
-| `POST /v1/auth/login`, Swagger | Público |
-| `POST /v1/medico`, `POST /v1/paciente`, `POST /v1/enfermeiro` | Público (autocadastro) |
-| `/v1/recepcionista/**` | Apenas `ADMINISTRADOR` |
-| `/v1/historico-paciente/**` | Apenas `ADMINISTRADOR` |
-| Demais rotas | Qualquer usuário autenticado |
-
-O cadastro de Recepcionista e o Histórico do Paciente são restritos ao `ADMINISTRADOR` em todos os métodos (`GET`, `POST`, `PATCH` e `DELETE`). Um usuário autenticado com outro perfil recebe `403 Acesso Negado!`; uma requisição sem token — ou com token inválido, expirado ou pertencente a um usuário excluído — recebe `401 Não Autorizado!`.
-
-<br>
-
-### Exclusão de cadastro e acesso
-
-A exclusão de Médico, Enfermeiro, Recepcionista e Paciente é **lógica**: o cadastro passa para a situação `EXCLUIDO` e permanece no banco para fins de histórico. Junto com o cadastro, as **credenciais do usuário também são desativadas** — a coluna `id_situacaocadastro` da tabela `usuario` recebe `EXCLUIDO`. A partir daí:
-
-- uma nova tentativa de `POST /v1/auth/login` responde `403 Usuário Inativo!`, mesmo com a senha correta;
-- um token emitido **antes** da exclusão deixa de valer: o filtro de segurança recusa a requisição com `401 Não Autorizado!`.
-
-Diferente dos demais, o Histórico do Paciente é excluído de forma **definitiva**, pois a tabela não guarda situação de cadastro.
+> ⚠️ Cadastro (`POST`) de Médico, Paciente e Enfermeiro **não exige token** (autocadastro livre). Todas as demais operações — listar, atualizar e excluir — exigem um usuário autenticado, e as rotas de Recepcionista e de Histórico do Paciente exigem, além disso, a role `ADMINISTRADOR` em todos os métodos.
 
 <br>
 
@@ -178,6 +240,47 @@ Para fazer login, você sempre usa a senha **em texto puro** que foi escolhida n
 > ℹ️ Hoje, no seed de testes, todos os usuários compartilham o **mesmo hash** no banco — isso é só uma facilidade para os testes locais. Usuários cadastrados normalmente pela API terão hashes diferentes entre si mesmo usando a mesma senha, pois o BCrypt gera um sal aleatório novo a cada cadastro.
 
 <br>
+
+## 🌐 Endpoints
+
+Todas as rotas abaixo são relativas ao context path **`/AgendamentoAPI`**.
+
+| Método   | Rota                  | Autenticação | Descrição                                        |
+| -------- | --------------------- | ------------ | ------------------------------------------------ |
+| `POST`   | `/v1/auth/login`      | Pública      | Autentica o usuário e devolve o token JWT        |
+| `GET`    | `/v1/medico`          | Requerida    | Lista os médicos (paginado)                      |
+| `POST`   | `/v1/medico`          | Pública      | Cadastra um médico                               |
+| `PATCH`  | `/v1/medico/{id}`     | Requerida    | Atualiza os dados de um médico                   |
+| `DELETE` | `/v1/medico/{id}`     | Requerida    | Exclui logicamente um médico                     |
+| `GET`    | `/v1/enfermeiro`      | Requerida    | Lista os enfermeiros (paginado)                  |
+| `POST`   | `/v1/enfermeiro`      | Pública      | Cadastra um enfermeiro                           |
+| `PATCH`  | `/v1/enfermeiro/{id}` | Requerida    | Atualiza os dados de um enfermeiro               |
+| `DELETE` | `/v1/enfermeiro/{id}` | Requerida    | Exclui logicamente um enfermeiro                 |
+| `GET`    | `/v1/paciente`        | Requerida    | Lista os pacientes (paginado)                    |
+| `POST`   | `/v1/paciente`        | Pública      | Cadastra um paciente                             |
+| `PATCH`  | `/v1/paciente/{id}`   | Requerida    | Atualiza os dados de um paciente                 |
+| `DELETE` | `/v1/paciente/{id}`   | Requerida    | Exclui logicamente um paciente                   |
+| `GET`    | `/v1/recepcionista`   | `ADMINISTRADOR` | Lista os recepcionistas (paginado)            |
+| `POST`   | `/v1/recepcionista`   | `ADMINISTRADOR` | Cadastra um recepcionista                     |
+| `PATCH`  | `/v1/recepcionista/{id}` | `ADMINISTRADOR` | Atualiza os dados de um recepcionista      |
+| `DELETE` | `/v1/recepcionista/{id}` | `ADMINISTRADOR` | Exclui logicamente um recepcionista        |
+| `GET`    | `/v1/historico-paciente` | `ADMINISTRADOR` | Lista os históricos dos pacientes (paginado) |
+| `POST`   | `/v1/historico-paciente` | `ADMINISTRADOR` | Cadastra um histórico de paciente          |
+| `PATCH`  | `/v1/historico-paciente/{id}` | `ADMINISTRADOR` | Atualiza um histórico de paciente     |
+| `DELETE` | `/v1/historico-paciente/{id}` | `ADMINISTRADOR` | Exclui um histórico de paciente       |
+| `GET`    | `/v1/agendamento`     | Requerida    | Lista as consultas agendadas (paginado)          |
+| `POST`   | `/v1/agendamento`     | Requerida    | Agenda uma nova consulta                         |
+| `PATCH`  | `/v1/agendamento/{id}`| Requerida    | Atualiza a data/hora e a observação de uma consulta |
+
+> ℹ️ O `PATCH` é uma **atualização parcial**: **nenhum campo é obrigatório**. Envie somente os que deseja alterar — os ausentes (e também os enviados como string vazia ou só com espaços) preservam o valor atual. As validações de formato continuam valendo para os campos que forem enviados preenchidos: um `email` inválido ou um `cpf` fora dos 11 caracteres ainda respondem `400`. Em contrapartida, o Jackson está em modo estrito, então um campo **desconhecido** no JSON derruba a requisição com `400`.
+
+> ℹ️ O cadastro de paciente exige, além dos dados pessoais, `email` (único e validado) e `telefone`. O agendamento aceita um campo opcional `observacao`.
+
+> ℹ️ A exclusão é **lógica**: o registro não é removido do banco, apenas tem sua situação de cadastro alterada para `EXCLUIDO` — e, junto com ele, o usuário perde o acesso (o login passa a responder `403`). A única exceção é o histórico do paciente, que não tem situação de cadastro e é removido de fato.
+
+> ℹ️ As listagens são paginadas e a numeração começa em **1**. Utilize os parâmetros `page`, `size` e `sort` (por exemplo, `/v1/paciente?page=1&size=20&sort=nome`).
+
+<br> 
 
 ## 📑 Swagger
 
@@ -197,45 +300,32 @@ Caso inicie a aplicação utilizando a opção `BootRun - PROD` e acesse o link 
 $ http://localhost:9027/AgendamentoAPI/swagger-ui/index.html
 ```
 
+> ⚠️ O context path diferencia maiúsculas de minúsculas: utilize `/AgendamentoAPI`, e não `/agendamentoapi`.
+
 <br> 
 
 ## 🧪 Testes
 
-A suíte é composta por **testes de integração** que sobem o contexto completo do Spring (`@SpringBootTest`) contra um **PostgreSQL real** — não há banco em memória. Antes de rodar, garanta que o banco de desenvolvimento esteja no ar:
+A suíte de testes é composta por **testes de integração reais**: eles sobem o contexto do Spring e se conectam a um PostgreSQL de verdade. Por isso, **o banco precisa estar no ar antes de executar os testes**:
 
 ```bash
-docker compose -f docker-compose-postgres.yml up -d
-```
-
-```bash
-# Roda toda a suíte e gera o relatório de cobertura
+docker compose -f docker-compose-postgres-dev.yml up -d --wait
 ./gradlew test
-
-# Força a reexecução mesmo que nada tenha mudado
-./gradlew cleanTest test
 ```
 
-Os testes usam o perfil `test` e a classe `TestDataBaseConfig`, que monta o `DataSource` a partir das variáveis `DATABASE_IP`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER` e `DATABASE_PASSWORD` (com os mesmos padrões do `docker-compose-postgres.yml`). Cada teste roda dentro de uma transação que sofre *rollback* ao final, então o seed das migrations é preservado entre as execuções.
+Os testes utilizam o perfil `test`, que carrega a configuração de banco de `TestDataBaseConfig` (com valores padrão apontando para `localhost:8745`) e executam dentro de transações revertidas ao final de cada caso. Os payloads das requisições dos testes de controller ficam em `src/test/resources/<dominio>/`, lidos por caminho relativo — portanto, execute os testes a partir da raiz do projeto.
 
-### Organização
-
-```
-config/                     → infraestrutura da suíte (AbstractTest, AbstractControllerTest, TestDataBaseConfig)
-controller/<dominio>/       → testes de endpoint via MockMvc, com corpo lido de src/test/resources
-service/<dominio>/          → testes de regra de negócio contra o banco
-security/                   → testes de autenticação e autorização (perfis de acesso e filtro JWT)
-```
-
-### Cobertura
-
-O relatório do JaCoCo é gerado automaticamente ao final do `./gradlew test`:
+Ao final da execução, o **JaCoCo** gera o relatório de cobertura em:
 
 ```bash
-# Relatório de cobertura
-$ build/reports/jacoco/test/html/index.html
+build/reports/jacoco/test/html/index.html
 ```
 
-A cobertura atual é de **100%** de instruções e de branches. O escopo medido é o de `controller`, `service` e `repository` — os pacotes `config`, `enums`, `exceptions` e `model` são excluídos do cálculo no `build.gradle.kts`, por serem majoritariamente estrutura, records e anotações.
+<br> 
+
+## 🔄 Integração Contínua
+
+O workflow em `.github/workflows/workflow.yml` é acionado a cada Pull Request aberto contra a branch `main`. Ele sobe um container PostgreSQL, configura o Java 21 e executa `./gradlew build`, garantindo que a compilação e os testes automatizados passem antes do merge.
 
 <br> 
 

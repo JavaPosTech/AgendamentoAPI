@@ -12,4 +12,5 @@ public interface RecepcionistaRepository extends JpaRepository<Recepcionista, In
 
     @EntityGraph(attributePaths = {"usuario", "situacaoCadastro"})
     Page<Recepcionista> findAll(Pageable pageable);
+
 }

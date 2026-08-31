@@ -29,6 +29,9 @@ public class Agendamento {
     @Column(name = "datahora_consulta", nullable = false)
     private LocalDateTime dataHoraConsulta;
 
+    @Column(columnDefinition = "TEXT")
+    private String observacao;
+
     @Column(name = "data_cadastro", nullable = false)
     private LocalDateTime dataCadastro;
 

@@ -54,7 +54,14 @@ public class AgendamentoService {
         log.info("Atualizando Consulta... - ID: [{}]", id);
         var agendamento = agendamentoRepository.findById(id).orElseThrow(() -> new ConsultaNaoEncontradaException("Consulta não encontrada!"));
 
-        agendamento.setDataHoraConsulta(atualizarAgendamentoRequest.dataHoraConsulta());
+        if (atualizarAgendamentoRequest.dataHoraConsulta() != null) {
+            agendamento.setDataHoraConsulta(atualizarAgendamentoRequest.dataHoraConsulta());
+        }
+
+        if (atualizarAgendamentoRequest.observacao() != null) {
+            agendamento.setObservacao(atualizarAgendamentoRequest.observacao());
+        }
+
         return new MensagemSucessoResponse(200, "Consulta atualizada com sucesso!");
     }
 }

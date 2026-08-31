@@ -18,10 +18,13 @@ class HistoricoPacienteControllerTest extends AbstractControllerTest {
 
     private String atualizarHistoricoPacienteRequest;
 
+    private String atualizarHistoricoPacienteParcialRequest;
+
     @BeforeEach
     void setUp() throws IOException {
         salvarHistoricoPacienteRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/historicopaciente/salvarHistoricoPacienteRequest.json")));
         atualizarHistoricoPacienteRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/historicopaciente/atualizarHistoricoPacienteRequest.json")));
+        atualizarHistoricoPacienteParcialRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/historicopaciente/atualizarHistoricoPacienteParcialRequest.json")));
     }
 
     @Test
@@ -37,6 +40,11 @@ class HistoricoPacienteControllerTest extends AbstractControllerTest {
     @Test
     void atualizarTest() throws Exception {
         testPatch("/v1/historico-paciente/1", atualizarHistoricoPacienteRequest);
+    }
+
+    @Test
+    void atualizarParcialTest() throws Exception {
+        testPatch("/v1/historico-paciente/1", atualizarHistoricoPacienteParcialRequest);
     }
 
     @Test

@@ -18,6 +18,8 @@ public record AgendamentoDTO(
         @JsonFormat(pattern = "dd/MM/yyyy - HH:mm:ss")
         LocalDateTime dataHoraConsulta,
 
+        String observacao,
+
         @JsonFormat(pattern = "dd/MM/yyyy - HH:mm:ss")
         LocalDateTime dataCadastro
 
@@ -27,6 +29,7 @@ public record AgendamentoDTO(
                 agendamento.getMedico().getNome(),
                 agendamento.getPaciente().getNome(),
                 agendamento.getDataHoraConsulta(),
+                agendamento.getObservacao(),
                 agendamento.getDataCadastro());
     }
 }
