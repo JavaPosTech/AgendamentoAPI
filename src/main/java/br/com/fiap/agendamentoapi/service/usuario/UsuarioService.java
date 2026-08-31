@@ -1,9 +1,11 @@
 package br.com.fiap.agendamentoapi.service.usuario;
 
+import br.com.fiap.agendamentoapi.enums.SituacaoCadastro;
 import br.com.fiap.agendamentoapi.model.dto.usuario.UsuarioDTO;
 import br.com.fiap.agendamentoapi.model.entity.usuario.Usuario;
 import br.com.fiap.agendamentoapi.model.mapper.usuario.UsuarioMapper;
 import br.com.fiap.agendamentoapi.repository.usuario.UsuarioRepository;
+import br.com.fiap.agendamentoapi.service.situacaocadastro.SituacaoCadastroService;
 import br.com.fiap.agendamentoapi.service.tipousuario.TipoUsuarioService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,8 @@ public class UsuarioService {
 
     private final TipoUsuarioService tipoUsuarioService;
 
+    private final SituacaoCadastroService situacaoCadastroService;
+
     public Integer salvar(UsuarioDTO usuarioDTO) {
         log.info("Salvando credenciais do Usuário: {}", usuarioDTO.login());
 
@@ -40,21 +44,25 @@ public class UsuarioService {
         return usuarioRepository.getReferenceById(id);
     }
 
+    @Transactional
+    public void desativar(Usuario usuario) {
+        log.info("Desativando credenciais do Usuário - ID: [{}]", usuario.getId());
+        usuario.setSituacaoCadastro(situacaoCadastroService.buscarReferenciaPorId(SituacaoCadastro.EXCLUIDO.getId()));
+        log.info("Credenciais do Usuário desativadas com sucesso! - ID: [{}]", usuario.getId());
+    }
+
     private Usuario processarUsuario(UsuarioDTO usuarioDTO) {
         log.info("Processando credenciais do Usuário...");
         var usuario = usuarioMapper.toEntity(usuarioDTO);
 
         usuario.setSenha(encriptografarSenha(usuarioDTO.senha()));
         usuario.setTipoUsuario(tipoUsuarioService.buscarPorId(usuarioDTO.tipoUsuarioId()));
+        usuario.setSituacaoCadastro(situacaoCadastroService.buscarReferenciaPorId(SituacaoCadastro.ATIVO.getId()));
 
         return usuario;
     }
 
     private String encriptografarSenha(String senha) {
         return passwordEncoder.encode(senha);
-    }
-
-    private boolean validarSenha(String senha, String hash) {
-        return passwordEncoder.matches(senha, hash);
     }
 }

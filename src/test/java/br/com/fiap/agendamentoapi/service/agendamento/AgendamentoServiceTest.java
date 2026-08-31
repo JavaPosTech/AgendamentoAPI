@@ -1,6 +1,7 @@
 package br.com.fiap.agendamentoapi.service.agendamento;
 
 import br.com.fiap.agendamentoapi.config.AbstractTest;
+import br.com.fiap.agendamentoapi.exceptions.ConsultaNaoEncontradaException;
 import br.com.fiap.agendamentoapi.model.request.agendamento.AtualizarAgendamentoRequest;
 import br.com.fiap.agendamentoapi.model.request.agendamento.SalvarAgendamentoRequest;
 import org.junit.jupiter.api.Assertions;
@@ -38,6 +39,13 @@ class AgendamentoServiceTest extends AbstractTest {
         Assertions.assertDoesNotThrow(() -> agendamentoService.atualizar(1, new AtualizarAgendamentoRequest(
                 LocalDateTime.now(),
                 "Consulta remarcada."
+        )));
+    }
+
+    @Test
+    void atualizarTestComIdInexistente() {
+        Assertions.assertThrows(ConsultaNaoEncontradaException.class, () -> agendamentoService.atualizar(Integer.MAX_VALUE, new AtualizarAgendamentoRequest(
+                LocalDateTime.now()
         )));
     }
 }

@@ -13,6 +13,7 @@ public interface UsuarioMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "tipoUsuario", ignore = true)
+    @Mapping(target = "situacaoCadastro", ignore = true)
     Usuario toEntity(UsuarioDTO dto);
 
 }

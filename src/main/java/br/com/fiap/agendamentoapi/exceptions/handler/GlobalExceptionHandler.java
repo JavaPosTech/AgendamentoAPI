@@ -1,9 +1,6 @@
 package br.com.fiap.agendamentoapi.exceptions.handler;
 
-import br.com.fiap.agendamentoapi.exceptions.ConsultaNaoEncontradaException;
-import br.com.fiap.agendamentoapi.exceptions.SenhaIncorretaException;
-import br.com.fiap.agendamentoapi.exceptions.TipoUsuarioNaoEncontradoException;
-import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
+import br.com.fiap.agendamentoapi.exceptions.*;
 import br.com.fiap.agendamentoapi.exceptions.dto.ErrorResponseDTO;
 import br.com.fiap.agendamentoapi.exceptions.dto.MethodArgumentNotValidResponseDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -218,5 +215,31 @@ public class GlobalExceptionHandler implements AuthenticationEntryPoint, AccessD
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+    }
+
+    @ExceptionHandler(HistoricoPacienteNaoEncontradoException.class)
+    public ResponseEntity<ErrorResponseDTO> handleHistoricoPacienteNaoEncontradoException(HistoricoPacienteNaoEncontradoException ex, HttpServletRequest pHttpServletRequest) {
+
+        var response = new ErrorResponseDTO(
+                HttpStatus.NOT_FOUND.value(),
+                "Histórico do paciente não encontrado!",
+                pHttpServletRequest.getRequestURI(),
+                "/AgendamentoAPI/problems/historico-paciente-not-found",
+                ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(UsuarioInativoException.class)
+    public ResponseEntity<ErrorResponseDTO> handleUsuarioInativoException(UsuarioInativoException ex, HttpServletRequest pHttpServletRequest) {
+
+        var response = new ErrorResponseDTO(
+                HttpStatus.FORBIDDEN.value(),
+                "Usuário Inativo!",
+                pHttpServletRequest.getRequestURI(),
+                "/AgendamentoAPI/problems/user-inactive",
+                ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 }

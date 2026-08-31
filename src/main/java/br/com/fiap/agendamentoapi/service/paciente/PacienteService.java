@@ -81,6 +81,7 @@ public class PacienteService {
         var paciente = pacienteRepository.findById(id).orElseThrow(() -> new UsuarioNaoEncontradoException("Paciente não encontrado!"));
 
         paciente.setSituacaoCadastro(situacaoCadastroService.buscarReferenciaPorId(SituacaoCadastro.EXCLUIDO.getId()));
+        usuarioService.desativar(paciente.getUsuario());
         log.info("Paciente excluído com sucesso! - ID: [{}]", id);
     }
 }

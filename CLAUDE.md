@@ -37,6 +37,8 @@ Context path da aplicação: **`/AgendamentoAPI`** (definido em `application.yam
 # Subir apenas o PostgreSQL de desenvolvimento (host 8745 → container 5432)
 docker compose -f docker-compose-postgres-dev.yml up -d --wait
 
+> Na branch `ADJ-8` o único compose de banco é `docker-compose-postgres.yml` (host 8745 → container 5432); os dois arquivos `-dev`/`-prod` vêm da `ADJ-7`. Depois do merge, use os nomes acima.
+
 # Subir em modo produção (requer .env preenchido) — banco primeiro, depois a API
 docker compose -f docker-compose-postgres-prod.yml up -d --wait
 docker compose -f docker-compose-agendamentoapi.yml up -d
@@ -66,7 +68,7 @@ enums/                      → TipoUsuario, SituacaoCadastro (espelham tabelas 
 
 **Ao criar um novo domínio, replique essa fatia vertical completa** (entity → repository → mapper → request/DTO → service → controller → migration → testes de service e de controller).
 
-Dois domínios existem hoje apenas **parcialmente**: `recepcionista` e `historicopaciente` têm entidade, DTO e repositório, mas ainda não têm mapper, service nem controller. As tabelas `recepcionista` e `historico_paciente` já fazem parte do schema criado por este serviço e são consumidas pela HistoricoAPI. Ao completar um desses domínios, siga a fatia vertical acima — a migration correspondente já existe.
+Todos os domínios listados acima possuem a fatia vertical completa. `recepcionista` e `historicopaciente` foram os últimos a ser concluídos: até então tinham apenas entidade, DTO e repositório. As tabelas `recepcionista` e `historico_paciente` fazem parte do schema criado por este serviço e são consumidas pela HistoricoAPI.
 
 ### Fluxo de uma requisição
 
@@ -77,8 +79,8 @@ Dois domínios existem hoje apenas **parcialmente**: `recepcionista` e `historic
 * **Idioma:** todo o código, mensagens de log, mensagens de erro e nomes de campo são em **português**. Mantenha esse padrão.
 * **Records para DTO/Request**, classes com Lombok para entidades.
 * **Sem Javadoc e sem comentários — em nenhum arquivo:** não há `/** ... */`, `//` ou `#` explicativos nas classes Java, no `build.gradle.kts`, nos arquivos Compose, no `Dockerfile`, no `application.yaml` nem nos arquivos de ignore. A documentação da API vive nas anotações do SpringDoc (`@Schema`, `@Operation`) e o restante do contexto neste arquivo e no `README.md`. **Não acrescente comentários ao criar ou alterar arquivos aqui** — se algo precisa de explicação, ela vai para a documentação.
-* **Exclusão é lógica, não física:** `deletar(...)` troca a `situacaoCadastro` para `SituacaoCadastro.EXCLUIDO` dentro de um método `@Transactional`, contando com o dirty checking do JPA. Não use `repository.delete(...)`.
-* **Atualizações usam `PATCH`** e passam por `mapper.updateEntity(request, entidade)` — o mapper ignora `id`, `usuario`, `dataCadastro` e `situacaoCadastro`. Os mappers de `medico`, `enfermeiro` e `paciente` declaram `nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE`, então campo ausente no JSON **mantém** o valor atual em vez de gravar `null` — é o que dá ao `PATCH` semântica de atualização parcial. Esses três mappers também declaram um método `preenchido(String)` anotado com `@Condition`, que estende a mesma semântica às strings em branco: `""` ou só espaços são tratados como campo ausente e mantêm o valor atual, em vez de apagá-lo. Os records de atualização, portanto, não precisam de validação para recusar string vazia. `AgendamentoService.atualizar(...)` não usa mapper e faz essa checagem de `null` campo a campo, na mão.
+* **Exclusão é lógica, não física:** `deletar(...)` troca a `situacaoCadastro` para `SituacaoCadastro.EXCLUIDO` dentro de um método `@Transactional`, contando com o dirty checking do JPA. Não use `repository.delete(...)`. **A exclusão também desativa as credenciais**: o `deletar(...)` de `medico`, `enfermeiro`, `recepcionista` e `paciente` chama `usuarioService.desativar(entidade.getUsuario())`, que marca a coluna `id_situacaocadastro` da tabela `usuario` como `EXCLUIDO`. A partir daí o login responde `403 Usuário Inativo!` e um token emitido antes da exclusão é recusado com `401`. `HistoricoPacienteService.deletar(...)` é a única exceção e apaga o registro de verdade, porque `historico_paciente` não tem coluna de situação.
+* **Atualizações usam `PATCH`** e passam por `mapper.updateEntity(request, entidade)` — o mapper ignora `id`, `usuario`, `dataCadastro` e `situacaoCadastro`. Todos os mappers de atualização declaram `nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE`, então campo ausente no JSON **mantém** o valor atual em vez de gravar `null` — é o que dá ao `PATCH` semântica de atualização parcial. Os mappers de `medico`, `enfermeiro` e `paciente` vão além e declaram um método `preenchido(String)` anotado com `@Condition`, que estende a mesma semântica às strings em branco: `""` ou só espaços são tratados como campo ausente e mantêm o valor atual, em vez de apagá-lo — por isso os records de atualização desses domínios não precisam de validação para recusar string vazia. **`HistoricoPacienteMapper` ainda não tem o `@Condition`**: ele só ignora `null`, e o record correspondente mantém `@NotBlank` nos campos obrigatórios. Ao uniformizar, replique o `@Condition` lá. `AgendamentoService.atualizar(...)` não usa mapper e faz essa checagem de `null` campo a campo, na mão.
 * **Paginação:** `@PageableDefault(size = 100, sort = "id")` com `one-indexed-parameters: true` (a página 1 é a primeira). Use sempre `PageResponse.from(page, DTO::new)`.
 * **Senhas** passam por `BCryptPasswordEncoder` em `UsuarioService`; nunca persista texto puro nem exponha o hash em DTO.
 * **Logging:** `@Slf4j` no service, com log de início e de conclusão da operação (`log.info("Salvando Paciente... - Nome: {}", ...)`).
@@ -91,10 +93,10 @@ O `DataSource` **não** é montado pelo `spring.datasource` do Spring Boot: `con
 
 Migrações Flyway ficam em `src/main/resources/db/migration/`, no padrão `V<versão>__<Descrição>.sql`:
 
-* `V1.0__CreateTables.sql` — esquema completo (`tipo_usuario`, `situacao_cadastro`, `usuario`, `medico`, `enfermeiro`, `recepcionista`, `paciente`, `historico_paciente`, `agendamento`)
+* `V1.0__CreateTables.sql` — esquema completo (`tipo_usuario`, `situacao_cadastro`, `usuario`, `medico`, `enfermeiro`, `recepcionista`, `paciente`, `historico_paciente`, `agendamento`). A tabela `usuario` carrega `id_situacaocadastro` (default `ATIVO`), que é o que permite desativar o login de um cadastro excluído.
 * `V1.1__Inserts.sql` — dados de domínio + seed de usuários, médicos, enfermeiros e pacientes
 
-**Nunca edite uma migração já aplicada** — crie uma nova versão. Ao alterar uma entidade JPA, a migração correspondente é obrigatória: `ddl-auto` não está habilitado, o esquema vem inteiro do Flyway.
+**Enquanto o projeto estiver em desenvolvimento, alterações de schema entram nas migrações que já existem** — coluna nova vai direto para o `CREATE TABLE` correspondente na `V1.0`, dado de apoio vai para a `V1.1`. Não crie uma versão nova para isso. A consequência é que o checksum muda e o Flyway passa a recusar a validação contra um banco que já tinha a versão antiga aplicada (`FlywayValidateException: Validate failed`); o caminho esperado é recriar o schema do zero, o que também serve de verificação de que as migrações continuam funcionando desde o início. Confirme antes de apagar o banco de alguém. Quando houver dados reais em jogo, essa regra se inverte: aí uma migração nova é a única opção. Em qualquer cenário, ao alterar uma entidade JPA a migração correspondente é obrigatória: `ddl-auto` não está habilitado, o esquema vem inteiro do Flyway.
 
 ### Banco compartilhado entre os microsserviços
 
@@ -119,19 +121,22 @@ Todas as APIs da fase escutam em `9027` dentro do container no perfil `prod`, en
 * `POST /v1/auth/login`, `/v3/api-docs/**`, `/swagger-ui/**`, `/swagger-ui.html`
 * `POST` em `/v1/medico`, `/v1/paciente`, `/v1/enfermeiro` (autocadastro)
 
-Todo o resto exige `Authorization: Bearer <token>`. A sessão é `STATELESS` e o CSRF está desabilitado. O `SecurityFilter` valida o token e popula o `SecurityContext`; token inválido apenas gera um `log.warn` e limpa o contexto — quem devolve o 401 é o `GlobalExceptionHandler`.
+`/v1/recepcionista/**` e `/v1/historico-paciente/**` exigem a role `ADMINISTRADOR` em todos os métodos. Todo o resto exige `Authorization: Bearer <token>`. A sessão é `STATELESS` e o CSRF está desabilitado.
+
+A role vem do `tipoUsuario` do usuário, prefixada com `ROLE_` em `UsuarioDetailsImpl`, e é comparada com `hasRole(...)` no `SecurityConfig`. O `SecurityFilter` valida o token, carrega o `UserDetails` e **só popula o `SecurityContext` se `isEnabled()` for verdadeiro** — token inválido, expirado ou pertencente a um usuário excluído apenas gera um `log.warn` e limpa o contexto; quem devolve o `401` é o `GlobalExceptionHandler`, que também responde `403 Acesso Negado!` quando a role não basta.
 
 `JWT_SECRET` e `JWT_EXPIRATION_MS` têm defaults embutidos em `TokenService` para desenvolvimento. **Em produção sempre defina `JWT_SECRET` via ambiente** — o default está no código-fonte e, portanto, é público.
 
 ## Testes
 
-Os testes são de **integração de verdade: exigem um PostgreSQL acessível**. Não há Testcontainers nem banco em memória. Suba `docker-compose-postgres-dev.yml` antes de rodar `./gradlew test`, ou os testes falham já na inicialização do contexto. Os defaults de `TestDataBaseConfig` (`localhost:8745`, `postgres` / `fiap@2026`) são exatamente as credenciais desse compose — se alterar um, altere o outro.
+Os testes são de **integração de verdade: exigem um PostgreSQL acessível**. Não há Testcontainers nem banco em memória. Suba o compose do PostgreSQL antes de rodar `./gradlew test`, ou os testes falham já na inicialização do contexto. Os defaults de `TestDataBaseConfig` (`localhost:8745`, `postgres` / `fiap@2026`) são exatamente as credenciais desse compose — se alterar um, altere o outro. Use `./gradlew cleanTest test` para forçar a reexecução quando nada tiver mudado.
 
 * `AbstractTest` — base dos testes de service: `@Transactional`, perfil `test`, importa `TestDataBaseConfig`.
-* `AbstractControllerTest` — base dos testes de controller: `MockMvc` + `@WithMockUser` (a segurança é contornada, então os testes não cobrem o fluxo real de JWT) e helpers `testGet`/`testPost`/`testPatch`/`testDelete`.
+* `AbstractControllerTest` — base dos testes de controller: `MockMvc` + `@WithMockUser` e helpers `testGet`/`testPost`/`testPatch`/`testDelete`. O `@WithMockUser` da classe base autentica com uma role genérica; testes de domínios restritos sobrescrevem com `@WithMockUser(roles = "ADMINISTRADOR")`.
+* `security/` — testes de autenticação e autorização, que **não** contornam a segurança: `AutorizacaoAdministradorTest` percorre cada perfil contra as rotas restritas (`403` para quem não é administrador, `401` para anônimo) e `SecurityFilterTest` exercita o fluxo real de JWT, incluindo token de usuário excluído. Classes de teste comuns não moram em `config/`, que é reservado à infraestrutura da suíte.
 * Payloads de controller vêm de arquivos JSON em `src/test/resources/<dominio>/`, lidos por caminho relativo — **rode os testes a partir da raiz do projeto**.
 * Os testes de service assertam principalmente `assertDoesNotThrow`; ao adicionar um campo a um record de request, os construtores posicionais nos testes quebram e precisam ser atualizados junto.
-* JaCoCo exclui da cobertura `config/`, `enums/`, `exceptions/`, `model/` e a classe principal. Relatório HTML em `build/reports/jacoco/test/html/index.html`.
+* JaCoCo exclui da cobertura `config/`, `enums/`, `exceptions/`, `model/` e a classe principal — o escopo medido é `controller`, `service` e `repository`, hoje em **100%** de instruções e de branches. Relatório HTML em `build/reports/jacoco/test/html/index.html`. Ao adicionar um caminho de erro (um `orElseThrow`, por exemplo), acrescente o teste do caso negativo junto, ou a cobertura cai.
 
 ## Pontos de Atenção Conhecidos
 
@@ -139,7 +144,6 @@ Os testes são de **integração de verdade: exigem um PostgreSQL acessível**. 
 * **Nome do jar no `Dockerfile`:** o artefato é copiado como `RestauranteAPI.jar` — resquício de outro projeto. Funciona, mas é enganoso.
 * **Context path é case-sensitive:** é `/AgendamentoAPI`, não `/agendamentoapi`.
 * **Credenciais de banco em arquivos versionáveis:** `TestDataBaseConfig` e os arquivos `.run/` carregam senhas como valor default/literal. Não propague esse padrão e nunca acrescente segredos novos ao código.
-* `UsuarioService.validarSenha(...)` está declarado, mas não é usado (a validação real acontece em `AuthService`).
 
 ## Convenção de Commits
 

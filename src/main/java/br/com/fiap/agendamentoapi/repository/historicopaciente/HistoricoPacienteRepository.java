@@ -12,8 +12,4 @@ public interface HistoricoPacienteRepository extends JpaRepository<HistoricoPaci
 
     @EntityGraph(attributePaths = {"paciente"})
     Page<HistoricoPaciente> findAll(Pageable pageable);
-
-    @EntityGraph(attributePaths = {"paciente"})
-    Page<HistoricoPaciente> findByPacienteId(Integer pacienteId, Pageable pageable);
-
 }

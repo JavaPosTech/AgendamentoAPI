@@ -1,7 +1,7 @@
 package br.com.fiap.agendamentoapi.config;
 
-import br.com.fiap.agendamentoapi.exceptions.handler.GlobalExceptionHandler;
 import br.com.fiap.agendamentoapi.config.security.SecurityFilter;
+import br.com.fiap.agendamentoapi.exceptions.handler.GlobalExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +33,13 @@ public class SecurityConfig {
             "/v1/enfermeiro"
     };
 
+    private static final String[] ENDPOINTS_ADMINISTRADOR = {
+            "/v1/recepcionista",
+            "/v1/recepcionista/**",
+            "/v1/historico-paciente",
+            "/v1/historico-paciente/**"
+    };
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -44,6 +51,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(ENDPOINTS_PUBLICOS).permitAll()
+                        .requestMatchers(ENDPOINTS_ADMINISTRADOR).hasRole("ADMINISTRADOR")
                         .requestMatchers(HttpMethod.POST, ENDPOINTS_CADASTRO_PUBLICO).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptionHandling -> exceptionHandling

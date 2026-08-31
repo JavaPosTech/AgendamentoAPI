@@ -24,10 +24,10 @@ public record RecepcionistaDTO(
 ) {
     public RecepcionistaDTO(Recepcionista recepcionista) {
         this(recepcionista.getId(),
-             recepcionista.getUsuario().getId(),
-             recepcionista.getNome(),
-             recepcionista.getSobrenome(),
-             recepcionista.getDataCadastro(),
-             recepcionista.getSituacaoCadastro().getDescricao());
+                recepcionista.getUsuario().getId(),
+                recepcionista.getNome(),
+                recepcionista.getSobrenome(),
+                recepcionista.getDataCadastro(),
+                recepcionista.getSituacaoCadastro().getDescricao());
     }
 }

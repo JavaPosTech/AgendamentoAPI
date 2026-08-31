@@ -29,7 +29,7 @@ public record SalvarPacienteRequest(
         String cpf,
 
         @NotBlank(message = "O campo 'email' é obrigatório!")
-        @Email(message = "O campo 'email' deve ser um e-mail válido!")
+        @Email(message = "O campo 'email' deve conter um e-mail válido!")
         @Size(max = 100, message = "O campo 'email' deve ter no máximo 100 caracteres!")
         String email,
 
