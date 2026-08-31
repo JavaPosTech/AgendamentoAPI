@@ -14,11 +14,17 @@
 
 * 🛠️ Gradle
 
+* 🦅 Flyway
+
 * ☕️ Java 21
 
-* 🐘 Postgres 
+* 🐘 Postgres
+
+* 🧪 JUnit 5 + JaCoCo
 
 * 🟢 Spring Boot 4.0.5
+
+* 🔐 Spring Security + JWT
 
 <br> 
 
@@ -136,6 +142,33 @@ O token expira em 24 horas (configurável via `JWT_EXPIRATION_MS`). Após expira
 
 <br>
 
+### Perfis de acesso
+
+Cada usuário pertence a um **tipo** (`ADMINISTRADOR`, `MEDICO`, `ENFERMEIRO`, `RECEPCIONISTA` ou `PACIENTE`), que é gravado no token no momento do login e transformado na `role` usada pelo Spring Security. As regras aplicadas hoje são:
+
+| Rotas | Quem pode acessar |
+| --- | --- |
+| `POST /v1/auth/login`, Swagger | Público |
+| `POST /v1/medico`, `POST /v1/paciente`, `POST /v1/enfermeiro` | Público (autocadastro) |
+| `/v1/recepcionista/**` | Apenas `ADMINISTRADOR` |
+| `/v1/historico-paciente/**` | Apenas `ADMINISTRADOR` |
+| Demais rotas | Qualquer usuário autenticado |
+
+O cadastro de Recepcionista e o Histórico do Paciente são restritos ao `ADMINISTRADOR` em todos os métodos (`GET`, `POST`, `PATCH` e `DELETE`). Um usuário autenticado com outro perfil recebe `403 Acesso Negado!`; uma requisição sem token — ou com token inválido, expirado ou pertencente a um usuário excluído — recebe `401 Não Autorizado!`.
+
+<br>
+
+### Exclusão de cadastro e acesso
+
+A exclusão de Médico, Enfermeiro, Recepcionista e Paciente é **lógica**: o cadastro passa para a situação `EXCLUIDO` e permanece no banco para fins de histórico. Junto com o cadastro, as **credenciais do usuário também são desativadas** — a coluna `id_situacaocadastro` da tabela `usuario` recebe `EXCLUIDO`. A partir daí:
+
+- uma nova tentativa de `POST /v1/auth/login` responde `403 Usuário Inativo!`, mesmo com a senha correta;
+- um token emitido **antes** da exclusão deixa de valer: o filtro de segurança recusa a requisição com `401 Não Autorizado!`.
+
+Diferente dos demais, o Histórico do Paciente é excluído de forma **definitiva**, pois a tabela não guarda situação de cadastro.
+
+<br>
+
 ### Sobre as senhas no banco de dados
 
 O projeto utiliza **BCrypt** para armazenar senhas. Isso significa que a senha de um usuário **nunca** fica salva em texto puro no banco — o que aparece na coluna `senha` (por exemplo, `$2y$05$ZpywJEw26dx/wK55JdAE7uSjF00ckF.qZwx4zqlVrKUjVxsIXr66a`) é um **hash criptográfico**, gerado a partir da senha real combinada com um valor aleatório (chamado de "sal"). Esse processo é de mão única: não existe forma de reverter o hash de volta para a senha original.
@@ -152,7 +185,7 @@ Para acessar a documentação da API, inicie a aplicação utilizando a opção 
 
 ```bash
 # URL para acessar a documentação da API 
-$ http://localhost:9017/agendamentoapi/swagger-ui/index.html
+$ http://localhost:9017/AgendamentoAPI/swagger-ui/index.html
 ```
 
 <br> 
@@ -161,8 +194,48 @@ Caso inicie a aplicação utilizando a opção `BootRun - PROD` e acesse o link 
 
 ```bash
 # URL para acessar a documentação da API 
-$ http://localhost:9027/agendamentoapi/swagger-ui/index.html
+$ http://localhost:9027/AgendamentoAPI/swagger-ui/index.html
 ```
+
+<br> 
+
+## 🧪 Testes
+
+A suíte é composta por **testes de integração** que sobem o contexto completo do Spring (`@SpringBootTest`) contra um **PostgreSQL real** — não há banco em memória. Antes de rodar, garanta que o banco de desenvolvimento esteja no ar:
+
+```bash
+docker compose -f docker-compose-postgres.yml up -d
+```
+
+```bash
+# Roda toda a suíte e gera o relatório de cobertura
+./gradlew test
+
+# Força a reexecução mesmo que nada tenha mudado
+./gradlew cleanTest test
+```
+
+Os testes usam o perfil `test` e a classe `TestDataBaseConfig`, que monta o `DataSource` a partir das variáveis `DATABASE_IP`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER` e `DATABASE_PASSWORD` (com os mesmos padrões do `docker-compose-postgres.yml`). Cada teste roda dentro de uma transação que sofre *rollback* ao final, então o seed das migrations é preservado entre as execuções.
+
+### Organização
+
+```
+config/                     → infraestrutura da suíte (AbstractTest, AbstractControllerTest, TestDataBaseConfig)
+controller/<dominio>/       → testes de endpoint via MockMvc, com corpo lido de src/test/resources
+service/<dominio>/          → testes de regra de negócio contra o banco
+security/                   → testes de autenticação e autorização (perfis de acesso e filtro JWT)
+```
+
+### Cobertura
+
+O relatório do JaCoCo é gerado automaticamente ao final do `./gradlew test`:
+
+```bash
+# Relatório de cobertura
+$ build/reports/jacoco/test/html/index.html
+```
+
+A cobertura atual é de **100%** de instruções e de branches. O escopo medido é o de `controller`, `service` e `repository` — os pacotes `config`, `enums`, `exceptions` e `model` são excluídos do cálculo no `build.gradle.kts`, por serem majoritariamente estrutura, records e anotações.
 
 <br> 
 

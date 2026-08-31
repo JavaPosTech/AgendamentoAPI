@@ -1,5 +1,6 @@
 package br.com.fiap.agendamentoapi.model.dto.auth;
 
+import br.com.fiap.agendamentoapi.enums.SituacaoCadastro;
 import br.com.fiap.agendamentoapi.model.entity.usuario.Usuario;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,9 +17,13 @@ public class UsuarioDetailsImpl implements UserDetails {
 
     private final Collection<? extends GrantedAuthority> authorities;
 
+    private final boolean ativo;
+
     public UsuarioDetailsImpl(Usuario usuario, String tipoUsuarioDescricao) {
         this.usuario = usuario;
         this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + tipoUsuarioDescricao));
+        this.ativo = usuario.getSituacaoCadastro() != null
+                && SituacaoCadastro.ATIVO.getId().equals(usuario.getSituacaoCadastro().getId());
     }
 
     @Override
@@ -53,6 +58,6 @@ public class UsuarioDetailsImpl implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return ativo;
     }
 }

@@ -4,6 +4,7 @@ import br.com.fiap.agendamentoapi.config.AbstractTest;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.model.request.medico.AtualizarMedicoRequest;
 import br.com.fiap.agendamentoapi.model.request.medico.SalvarMedicoRequest;
+import br.com.fiap.agendamentoapi.service.auth.UsuarioDetailsServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,9 @@ class MedicoServiceTest extends AbstractTest {
 
     @Autowired
     private MedicoService medicoService;
+
+    @Autowired
+    private UsuarioDetailsServiceImpl usuarioDetailsService;
 
     @Test
     void getMedicosTest() {
@@ -65,5 +69,25 @@ class MedicoServiceTest extends AbstractTest {
     @Test
     void deletarTestComIdInexistente() {
         Assertions.assertThrows(UsuarioNaoEncontradoException.class, () -> medicoService.deletar(Integer.MAX_VALUE));
+    }
+
+    @Test
+    void deletarDesativaAcessoDoUsuarioTest() {
+        Assertions.assertTrue(usuarioDetailsService.loadUserByUsername("joao.silva").isEnabled());
+
+        medicoService.deletar(1);
+
+        Assertions.assertFalse(usuarioDetailsService.loadUserByUsername("joao.silva").isEnabled());
+    }
+
+    @Test
+    void getMedicoByIdTest() {
+        var medico = Assertions.assertDoesNotThrow(() -> medicoService.getMedicoById(1));
+        Assertions.assertNotNull(medico);
+    }
+
+    @Test
+    void getMedicoByIdComIdInexistenteTest() {
+        Assertions.assertThrows(UsuarioNaoEncontradoException.class, () -> medicoService.getMedicoById(Integer.MAX_VALUE));
     }
 }

@@ -36,8 +36,13 @@ public class SecurityFilter extends OncePerRequestFilter {
                 var login = tokenService.validarToken(token);
                 var usuarioDetails = usuarioDetailsService.loadUserByUsername(login);
 
-                var authentication = new UsernamePasswordAuthenticationToken(usuarioDetails, null, usuarioDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (usuarioDetails.isEnabled()) {
+                    var authentication = new UsernamePasswordAuthenticationToken(usuarioDetails, null, usuarioDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    log.warn("Token de acesso pertence a um Usuário inativo: {}", login);
+                    SecurityContextHolder.clearContext();
+                }
             } catch (JwtException | IllegalArgumentException ex) {
                 log.warn("Token de acesso inválido: {}", ex.getMessage());
                 SecurityContextHolder.clearContext();

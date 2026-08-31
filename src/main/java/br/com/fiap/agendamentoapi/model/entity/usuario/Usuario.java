@@ -1,5 +1,6 @@
 package br.com.fiap.agendamentoapi.model.entity.usuario;
 
+import br.com.fiap.agendamentoapi.model.entity.situacaocadastro.SituacaoCadastro;
 import br.com.fiap.agendamentoapi.model.entity.tipousuario.TipoUsuario;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,5 +25,9 @@ public class Usuario {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tipousuario", nullable = false)
     private TipoUsuario tipoUsuario;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_situacaocadastro", nullable = false)
+    private SituacaoCadastro situacaoCadastro;
 
 }
