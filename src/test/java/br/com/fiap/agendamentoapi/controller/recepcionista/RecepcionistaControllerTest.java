@@ -18,10 +18,13 @@ class RecepcionistaControllerTest extends AbstractControllerTest {
 
     private String atualizarRecepcionistaRequest;
 
+    private String atualizarRecepcionistaParcialRequest;
+
     @BeforeEach
     void setUp() throws IOException {
         salvarRecepcionistaRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/recepcionista/salvarRecepcionistaRequest.json")));
         atualizarRecepcionistaRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/recepcionista/atualizarRecepcionistaRequest.json")));
+        atualizarRecepcionistaParcialRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/recepcionista/atualizarRecepcionistaParcialRequest.json")));
     }
 
     @Test
@@ -37,6 +40,11 @@ class RecepcionistaControllerTest extends AbstractControllerTest {
     @Test
     void atualizarTest() throws Exception {
         testPatch("/v1/recepcionista/1", atualizarRecepcionistaRequest);
+    }
+
+    @Test
+    void atualizarParcialTest() throws Exception {
+        testPatch("/v1/recepcionista/1", atualizarRecepcionistaParcialRequest);
     }
 
     @Test

@@ -51,6 +51,32 @@ class MedicoServiceTest extends AbstractTest {
     }
 
     @Test
+    void atualizarMantemCamposOmitidosOuEmBrancoTest() {
+        var medico = medicoService.getMedicoById(1);
+
+        var nomeOriginal = medico.getNome();
+        var sobrenomeOriginal = medico.getSobrenome();
+        var crmOriginal = medico.getCrm();
+        var enderecoOriginal = medico.getEndereco();
+
+        medicoService.atualizar(1, new AtualizarMedicoRequest(
+                null,
+                "   ",
+                "",
+                "Neurologia",
+                null
+        ));
+
+        var medicoAtualizado = medicoService.getMedicoById(1);
+
+        Assertions.assertEquals("Neurologia", medicoAtualizado.getEspecialidade());
+        Assertions.assertEquals(nomeOriginal, medicoAtualizado.getNome());
+        Assertions.assertEquals(sobrenomeOriginal, medicoAtualizado.getSobrenome());
+        Assertions.assertEquals(crmOriginal, medicoAtualizado.getCrm());
+        Assertions.assertEquals(enderecoOriginal, medicoAtualizado.getEndereco());
+    }
+
+    @Test
     void atualizarTestComIdInexistente() {
         Assertions.assertThrows(UsuarioNaoEncontradoException.class, () -> medicoService.atualizar(Integer.MAX_VALUE, new AtualizarMedicoRequest(
                 "Login Atualizado",

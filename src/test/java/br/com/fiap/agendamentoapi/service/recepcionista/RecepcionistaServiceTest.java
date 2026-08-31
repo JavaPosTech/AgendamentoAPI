@@ -4,6 +4,7 @@ import br.com.fiap.agendamentoapi.config.AbstractTest;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.model.request.recepcionista.AtualizarRecepcionistaRequest;
 import br.com.fiap.agendamentoapi.model.request.recepcionista.SalvarRecepcionistaRequest;
+import br.com.fiap.agendamentoapi.repository.recepcionista.RecepcionistaRepository;
 import br.com.fiap.agendamentoapi.service.auth.UsuarioDetailsServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,9 @@ class RecepcionistaServiceTest extends AbstractTest {
 
     @Autowired
     private UsuarioDetailsServiceImpl usuarioDetailsService;
+
+    @Autowired
+    private RecepcionistaRepository recepcionistaRepository;
 
     @Test
     void getRecepcionistasTest() {
@@ -42,6 +46,20 @@ class RecepcionistaServiceTest extends AbstractTest {
                 "Recepcionista Atualizado",
                 "Teste Atualizado"
         )));
+    }
+
+    @Test
+    void atualizarMantemCamposOmitidosOuEmBrancoTest() {
+        var recepcionista = recepcionistaRepository.findById(1).orElseThrow();
+
+        var sobrenomeOriginal = recepcionista.getSobrenome();
+
+        recepcionistaService.atualizar(1, new AtualizarRecepcionistaRequest("Recepcionista Atualizado", "   "));
+
+        var recepcionistaAtualizado = recepcionistaRepository.findById(1).orElseThrow();
+
+        Assertions.assertEquals("Recepcionista Atualizado", recepcionistaAtualizado.getNome());
+        Assertions.assertEquals(sobrenomeOriginal, recepcionistaAtualizado.getSobrenome());
     }
 
     @Test

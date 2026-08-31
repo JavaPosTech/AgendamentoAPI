@@ -15,11 +15,14 @@ class EnfermeiroControllerTest extends AbstractControllerTest {
 
     private String atualizarEnfermeiroRequest;
 
+    private String atualizarEnfermeiroParcialRequest;
+
     @BeforeEach
     void setUp() throws IOException {
         if (salvarEnfermeiroRequest == null && atualizarEnfermeiroRequest == null) {
             salvarEnfermeiroRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/enfermeiro/salvarEnfermeiroRequest.json")));
             atualizarEnfermeiroRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/enfermeiro/atualizarEnfermeiroRequest.json")));
+            atualizarEnfermeiroParcialRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/enfermeiro/atualizarEnfermeiroParcialRequest.json")));
         }
     }
 
@@ -36,6 +39,11 @@ class EnfermeiroControllerTest extends AbstractControllerTest {
     @Test
     void atualizarTest() throws Exception {
         testPatch("/v1/enfermeiro/1", atualizarEnfermeiroRequest);
+    }
+
+    @Test
+    void atualizarParcialTest() throws Exception {
+        testPatch("/v1/enfermeiro/1", atualizarEnfermeiroParcialRequest);
     }
 
     @Test

@@ -61,9 +61,9 @@ src/main/resources/
 └── db/migration/                 # Migrações Flyway (V1.0, V1.1, ...)
 ```
 
-O esquema do banco é criado **exclusivamente pelo Flyway** — não há `ddl-auto`. Toda alteração de entidade exige uma nova migração `V<versão>__<Descrição>.sql`; migrações já aplicadas nunca devem ser editadas.
+O esquema do banco é criado **exclusivamente pelo Flyway** — não há `ddl-auto`. Toda alteração de entidade exige a alteração da migração correspondente: enquanto o projeto está em desenvolvimento, coluna nova entra direto no `CREATE TABLE` da `V1.0` e dado de apoio na `V1.1`, em vez de ganhar uma versão nova. Como isso muda o checksum, o caminho esperado é recriar o schema do zero.
 
-> ℹ️ Os domínios `recepcionista` e `historicopaciente` existem hoje apenas como entidade, DTO e repositório — as tabelas fazem parte do schema da fase e são consumidas pela HistoricoAPI, mas ainda não há endpoints para elas nesta API.
+> ℹ️ Todos os domínios possuem a fatia vertical completa (entidade, repositório, mapper, request/DTO, service e controller). As tabelas `recepcionista` e `historico_paciente` fazem parte do schema da fase e também são consumidas pela HistoricoAPI.
 
 > ℹ️ O projeto **não utiliza Javadoc nem comentários explicativos** — nem no código Java, nem nos arquivos de build e de infraestrutura (`build.gradle.kts`, Compose, `Dockerfile`). A documentação dos modelos e das rotas fica nas anotações do SpringDoc (`@Schema`, `@Operation`), publicadas no Swagger UI, e todo o contexto de arquitetura, execução e infraestrutura neste `README.md`.
 
@@ -227,7 +227,7 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiJ9...
 
 O token expira em 24 horas (configurável via `JWT_EXPIRATION_MS`). Após expirar, é necessário realizar login novamente.
 
-> ⚠️ Cadastro (`POST`) de Médico, Paciente e Enfermeiro **não exige token** (autocadastro livre). Todas as demais operações — listar, atualizar e excluir — exigem um usuário autenticado.
+> ⚠️ Cadastro (`POST`) de Médico, Paciente e Enfermeiro **não exige token** (autocadastro livre). Todas as demais operações — listar, atualizar e excluir — exigem um usuário autenticado, e as rotas de Recepcionista e de Histórico do Paciente exigem, além disso, a role `ADMINISTRADOR` em todos os métodos.
 
 <br>
 
@@ -260,15 +260,23 @@ Todas as rotas abaixo são relativas ao context path **`/AgendamentoAPI`**.
 | `POST`   | `/v1/paciente`        | Pública      | Cadastra um paciente                             |
 | `PATCH`  | `/v1/paciente/{id}`   | Requerida    | Atualiza os dados de um paciente                 |
 | `DELETE` | `/v1/paciente/{id}`   | Requerida    | Exclui logicamente um paciente                   |
+| `GET`    | `/v1/recepcionista`   | `ADMINISTRADOR` | Lista os recepcionistas (paginado)            |
+| `POST`   | `/v1/recepcionista`   | `ADMINISTRADOR` | Cadastra um recepcionista                     |
+| `PATCH`  | `/v1/recepcionista/{id}` | `ADMINISTRADOR` | Atualiza os dados de um recepcionista      |
+| `DELETE` | `/v1/recepcionista/{id}` | `ADMINISTRADOR` | Exclui logicamente um recepcionista        |
+| `GET`    | `/v1/historico-paciente` | `ADMINISTRADOR` | Lista os históricos dos pacientes (paginado) |
+| `POST`   | `/v1/historico-paciente` | `ADMINISTRADOR` | Cadastra um histórico de paciente          |
+| `PATCH`  | `/v1/historico-paciente/{id}` | `ADMINISTRADOR` | Atualiza um histórico de paciente     |
+| `DELETE` | `/v1/historico-paciente/{id}` | `ADMINISTRADOR` | Exclui um histórico de paciente       |
 | `GET`    | `/v1/agendamento`     | Requerida    | Lista as consultas agendadas (paginado)          |
 | `POST`   | `/v1/agendamento`     | Requerida    | Agenda uma nova consulta                         |
 | `PATCH`  | `/v1/agendamento/{id}`| Requerida    | Atualiza a data/hora e a observação de uma consulta |
 
-> ℹ️ O `PATCH` é uma **atualização parcial**: envie somente os campos que deseja alterar — os ausentes preservam o valor atual. Em contrapartida, o Jackson está em modo estrito, então um campo **desconhecido** no JSON derruba a requisição com `400`.
+> ℹ️ O `PATCH` é uma **atualização parcial**: **nenhum campo é obrigatório**. Envie somente os que deseja alterar — os ausentes (e também os enviados como string vazia ou só com espaços) preservam o valor atual. As validações de formato continuam valendo para os campos que forem enviados preenchidos: um `email` inválido ou um `cpf` fora dos 11 caracteres ainda respondem `400`. Em contrapartida, o Jackson está em modo estrito, então um campo **desconhecido** no JSON derruba a requisição com `400`.
 
 > ℹ️ O cadastro de paciente exige, além dos dados pessoais, `email` (único e validado) e `telefone`. O agendamento aceita um campo opcional `observacao`.
 
-> ℹ️ A exclusão é **lógica**: o registro não é removido do banco, apenas tem sua situação de cadastro alterada para `EXCLUIDO`.
+> ℹ️ A exclusão é **lógica**: o registro não é removido do banco, apenas tem sua situação de cadastro alterada para `EXCLUIDO` — e, junto com ele, o usuário perde o acesso (o login passa a responder `403`). A única exceção é o histórico do paciente, que não tem situação de cadastro e é removido de fato.
 
 > ℹ️ As listagens são paginadas e a numeração começa em **1**. Utilize os parâmetros `page`, `size` e `sort` (por exemplo, `/v1/paciente?page=1&size=20&sort=nome`).
 

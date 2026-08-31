@@ -16,11 +16,14 @@ class AgendamentoControllerTest extends AbstractControllerTest {
 
     private String atualizarAgendamentoRequest;
 
+    private String atualizarAgendamentoParcialRequest;
+
     @BeforeEach
     void setUp() throws IOException {
         if (salvarAgendamentoRequest == null && atualizarAgendamentoRequest == null) {
             salvarAgendamentoRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/agendamento/salvarAgendamentoRequest.json")));
             atualizarAgendamentoRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/agendamento/atualizarAgendamentoRequest.json")));
+            atualizarAgendamentoParcialRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/agendamento/atualizarAgendamentoParcialRequest.json")));
         }
     }
 
@@ -37,5 +40,10 @@ class AgendamentoControllerTest extends AbstractControllerTest {
     @Test
     void atualizarTest() throws Exception {
         testPatch("/v1/agendamento/1", atualizarAgendamentoRequest);
+    }
+
+    @Test
+    void atualizarParcialTest() throws Exception {
+        testPatch("/v1/agendamento/1", atualizarAgendamentoParcialRequest);
     }
 }

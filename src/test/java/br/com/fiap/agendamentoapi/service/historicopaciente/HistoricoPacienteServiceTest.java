@@ -56,26 +56,29 @@ class HistoricoPacienteServiceTest extends AbstractTest {
     }
 
     @Test
-    void atualizarMantemCamposOpcionaisOmitidosTest() {
+    void atualizarMantemCamposOmitidosOuEmBrancoTest() {
         var historicoAntes = historicoPacienteRepository.findById(1).orElseThrow();
 
         var queixaOriginal = historicoAntes.getQueixaPrincipal();
+        var alergiasOriginais = historicoAntes.getAlergias();
         var observacoesOriginais = historicoAntes.getObservacoes();
 
         Assertions.assertNotNull(queixaOriginal);
+        Assertions.assertNotNull(alergiasOriginais);
         Assertions.assertNotNull(observacoesOriginais);
 
         historicoPacienteService.atualizar(1, new AtualizarHistoricoPacienteRequest(
                 null,
                 "Paciente relata melhora do quadro.",
                 "Dipirona 500mg",
-                "Nenhuma alergia conhecida.",
+                "   ",
                 null
         ));
 
         var historicoDepois = historicoPacienteRepository.findById(1).orElseThrow();
 
         Assertions.assertEquals(queixaOriginal, historicoDepois.getQueixaPrincipal());
+        Assertions.assertEquals(alergiasOriginais, historicoDepois.getAlergias());
         Assertions.assertEquals(observacoesOriginais, historicoDepois.getObservacoes());
         Assertions.assertEquals("Paciente relata melhora do quadro.", historicoDepois.getHistoricoDoenca());
         Assertions.assertEquals("Dipirona 500mg", historicoDepois.getMedicamentos());

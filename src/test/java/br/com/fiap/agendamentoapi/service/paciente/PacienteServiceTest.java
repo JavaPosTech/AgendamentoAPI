@@ -59,6 +59,38 @@ class PacienteServiceTest extends AbstractTest {
     }
 
     @Test
+    void atualizarMantemCamposOmitidosOuEmBrancoTest() {
+        var paciente = pacienteService.getPacienteById(1);
+
+        var nomeOriginal = paciente.getNome();
+        var cpfOriginal = paciente.getCpf();
+        var emailOriginal = paciente.getEmail();
+        var telefoneOriginal = paciente.getTelefone();
+        var enderecoOriginal = paciente.getEndereco();
+        var dataNascimentoOriginal = paciente.getDataNascimento();
+
+        pacienteService.atualizar(1, new AtualizarPacienteRequest(
+                null,
+                "Sobrenome Atualizado",
+                "   ",
+                null,
+                "",
+                null,
+                null)
+        );
+
+        var pacienteAtualizado = pacienteService.getPacienteById(1);
+
+        Assertions.assertEquals("Sobrenome Atualizado", pacienteAtualizado.getSobrenome());
+        Assertions.assertEquals(nomeOriginal, pacienteAtualizado.getNome());
+        Assertions.assertEquals(cpfOriginal, pacienteAtualizado.getCpf());
+        Assertions.assertEquals(emailOriginal, pacienteAtualizado.getEmail());
+        Assertions.assertEquals(telefoneOriginal, pacienteAtualizado.getTelefone());
+        Assertions.assertEquals(enderecoOriginal, pacienteAtualizado.getEndereco());
+        Assertions.assertEquals(dataNascimentoOriginal, pacienteAtualizado.getDataNascimento());
+    }
+
+    @Test
     void atualizarTestComIdInexistente() {
         Assertions.assertThrows(UsuarioNaoEncontradoException.class, () -> pacienteService.atualizar(Integer.MAX_VALUE, new AtualizarPacienteRequest(
                 "Nome Atualizado",

@@ -16,11 +16,14 @@ class PacienteControllerTest extends AbstractControllerTest {
 
     private String atualizarPacienteRequest;
 
+    private String atualizarPacienteParcialRequest;
+
     @BeforeEach
     void setUp() throws IOException {
         if (salvarPacienteRequest == null && atualizarPacienteRequest == null) {
             salvarPacienteRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/paciente/salvarPacienteRequest.json")));
             atualizarPacienteRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/paciente/atualizarPacienteRequest.json")));
+            atualizarPacienteParcialRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/paciente/atualizarPacienteParcialRequest.json")));
         }
     }
 
@@ -37,6 +40,11 @@ class PacienteControllerTest extends AbstractControllerTest {
     @Test
     void atualizarTest() throws Exception {
         testPatch("/v1/paciente/1", atualizarPacienteRequest);
+    }
+
+    @Test
+    void atualizarParcialTest() throws Exception {
+        testPatch("/v1/paciente/1", atualizarPacienteParcialRequest);
     }
 
     @Test

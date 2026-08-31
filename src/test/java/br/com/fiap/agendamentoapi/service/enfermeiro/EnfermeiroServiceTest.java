@@ -4,6 +4,7 @@ import br.com.fiap.agendamentoapi.config.AbstractTest;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.model.request.enfermeiro.AtualizarEnfermeiroRequest;
 import br.com.fiap.agendamentoapi.model.request.enfermeiro.SalvarEnfermeiroRequest;
+import br.com.fiap.agendamentoapi.repository.enfermeiro.EnfermeiroRepository;
 import br.com.fiap.agendamentoapi.service.auth.UsuarioDetailsServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,9 @@ class EnfermeiroServiceTest extends AbstractTest {
 
     @Autowired
     private UsuarioDetailsServiceImpl usuarioDetailsService;
+
+    @Autowired
+    private EnfermeiroRepository enfermeiroRepository;
 
     @Test
     void getEnfermeirosTest() {
@@ -44,6 +48,22 @@ class EnfermeiroServiceTest extends AbstractTest {
                 "Senha Atualizada",
                 "Nome Atualizado"
         )));
+    }
+
+    @Test
+    void atualizarMantemCamposOmitidosOuEmBrancoTest() {
+        var enfermeiro = enfermeiroRepository.findById(1).orElseThrow();
+
+        var nomeOriginal = enfermeiro.getNome();
+        var sobrenomeOriginal = enfermeiro.getSobrenome();
+
+        enfermeiroService.atualizar(1, new AtualizarEnfermeiroRequest(null, "   ", "654321-SP"));
+
+        var enfermeiroAtualizado = enfermeiroRepository.findById(1).orElseThrow();
+
+        Assertions.assertEquals("654321-SP", enfermeiroAtualizado.getCoren());
+        Assertions.assertEquals(nomeOriginal, enfermeiroAtualizado.getNome());
+        Assertions.assertEquals(sobrenomeOriginal, enfermeiroAtualizado.getSobrenome());
     }
 
     @Test
