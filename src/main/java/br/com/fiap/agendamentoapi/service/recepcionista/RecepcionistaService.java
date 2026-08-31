@@ -77,6 +77,7 @@ public class RecepcionistaService {
                 .orElseThrow(() -> new UsuarioNaoEncontradoException("Recepcionista não encontrado!"));
 
         recepcionista.setSituacaoCadastro(situacaoCadastroService.buscarReferenciaPorId(SituacaoCadastro.EXCLUIDO.getId()));
+        usuarioService.desativar(recepcionista.getUsuario());
         log.info("Recepcionista excluído com sucesso! - ID: [{}]", id);
     }
 }

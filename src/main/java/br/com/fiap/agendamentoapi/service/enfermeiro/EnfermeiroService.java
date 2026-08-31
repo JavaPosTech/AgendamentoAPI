@@ -75,6 +75,7 @@ public class EnfermeiroService {
         var enfermeiro = enfermeiroRepository.findById(id).orElseThrow(() -> new UsuarioNaoEncontradoException("Enfermeiro não encontrado!"));
 
         enfermeiro.setSituacaoCadastro(situacaoCadastroService.buscarReferenciaPorId(SituacaoCadastro.EXCLUIDO.getId()));
+        usuarioService.desativar(enfermeiro.getUsuario());
         log.info("Enfermeiro excluído com sucesso! - ID: [{}]", id);
     }
 }

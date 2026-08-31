@@ -4,6 +4,7 @@ import br.com.fiap.agendamentoapi.config.AbstractTest;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.model.request.enfermeiro.AtualizarEnfermeiroRequest;
 import br.com.fiap.agendamentoapi.model.request.enfermeiro.SalvarEnfermeiroRequest;
+import br.com.fiap.agendamentoapi.service.auth.UsuarioDetailsServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,9 @@ class EnfermeiroServiceTest extends AbstractTest {
 
     @Autowired
     private EnfermeiroService enfermeiroService;
+
+    @Autowired
+    private UsuarioDetailsServiceImpl usuarioDetailsService;
 
     @Test
     void getEnfermeirosTest() {
@@ -59,5 +63,14 @@ class EnfermeiroServiceTest extends AbstractTest {
     @Test
     void deletarTestComIdInexistente() {
         Assertions.assertThrows(UsuarioNaoEncontradoException.class, () -> enfermeiroService.deletar(Integer.MAX_VALUE));
+    }
+
+    @Test
+    void deletarDesativaAcessoDoUsuarioTest() {
+        Assertions.assertTrue(usuarioDetailsService.loadUserByUsername("carlos.santos").isEnabled());
+
+        enfermeiroService.deletar(1);
+
+        Assertions.assertFalse(usuarioDetailsService.loadUserByUsername("carlos.santos").isEnabled());
     }
 }

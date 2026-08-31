@@ -1,7 +1,10 @@
 package br.com.fiap.agendamentoapi.service.auth;
 
+import br.com.fiap.agendamentoapi.enums.SituacaoCadastro;
 import br.com.fiap.agendamentoapi.exceptions.SenhaIncorretaException;
+import br.com.fiap.agendamentoapi.exceptions.UsuarioInativoException;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
+import br.com.fiap.agendamentoapi.model.entity.usuario.Usuario;
 import br.com.fiap.agendamentoapi.model.request.auth.LoginRequest;
 import br.com.fiap.agendamentoapi.repository.usuario.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +35,16 @@ public class AuthService {
             throw new SenhaIncorretaException("A senha informada está incorreta!");
         }
 
+        if (!estaAtivo(usuario)) {
+            throw new UsuarioInativoException("O usuário com login '%s' está inativo!".formatted(loginRequest.login()));
+        }
+
         log.info("Usuário autenticado com sucesso: {}", loginRequest.login());
         return tokenService.gerarToken(usuario);
+    }
+
+    private boolean estaAtivo(Usuario usuario) {
+        return usuario.getSituacaoCadastro() != null
+                && SituacaoCadastro.ATIVO.getId().equals(usuario.getSituacaoCadastro().getId());
     }
 }

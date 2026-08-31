@@ -229,4 +229,17 @@ public class GlobalExceptionHandler implements AuthenticationEntryPoint, AccessD
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
+
+    @ExceptionHandler(UsuarioInativoException.class)
+    public ResponseEntity<ErrorResponseDTO> handleUsuarioInativoException(UsuarioInativoException ex, HttpServletRequest pHttpServletRequest) {
+
+        var response = new ErrorResponseDTO(
+                HttpStatus.FORBIDDEN.value(),
+                "Usuário Inativo!",
+                pHttpServletRequest.getRequestURI(),
+                "/AgendamentoAPI/problems/user-inactive",
+                ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
 }

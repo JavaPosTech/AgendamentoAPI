@@ -1,6 +1,7 @@
 package br.com.fiap.agendamentoapi.controller.auth;
 
 import br.com.fiap.agendamentoapi.exceptions.SenhaIncorretaException;
+import br.com.fiap.agendamentoapi.exceptions.UsuarioInativoException;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.exceptions.handler.GlobalExceptionHandler;
 import br.com.fiap.agendamentoapi.model.request.auth.LoginRequest;
@@ -109,5 +110,26 @@ class AuthControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.title").value("Senha Incorreta!"));
+    }
+
+    @Test
+    void loginComUsuarioInativoTest() throws Exception {
+
+        when(authService.login(any(LoginRequest.class)))
+                .thenThrow(
+                        new UsuarioInativoException(
+                                "O usuário com login 'usuario.teste' está inativo!"
+                        )
+                );
+
+        mockMvc.perform(
+                        post("/v1/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(loginRequest)
+                )
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.title")
+                        .value("Usuário Inativo!"));
     }
 }

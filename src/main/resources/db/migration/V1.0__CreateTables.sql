@@ -13,7 +13,9 @@ CREATE TABLE IF NOT EXISTS public.usuario (
     login VARCHAR(100) NOT NULL UNIQUE,
     senha VARCHAR NOT NULL,
     id_tipousuario INTEGER NOT NULL,
-    FOREIGN KEY (id_tipousuario) REFERENCES public.tipo_usuario(id)
+    id_situacaocadastro INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY (id_tipousuario) REFERENCES public.tipo_usuario(id),
+    FOREIGN KEY (id_situacaocadastro) REFERENCES public.situacao_cadastro(id)
 );
 
 CREATE TABLE IF NOT EXISTS public.medico (

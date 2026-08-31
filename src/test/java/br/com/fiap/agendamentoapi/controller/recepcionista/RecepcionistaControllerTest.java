@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-@SpringBootTest
 @WithMockUser(roles = "ADMINISTRADOR")
+@SpringBootTest
 class RecepcionistaControllerTest extends AbstractControllerTest {
 
     private String salvarRecepcionistaRequest;
@@ -20,10 +20,8 @@ class RecepcionistaControllerTest extends AbstractControllerTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        if (salvarRecepcionistaRequest == null && atualizarRecepcionistaRequest == null) {
-            salvarRecepcionistaRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/recepcionista/salvarRecepcionistaRequest.json")));
-            atualizarRecepcionistaRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/recepcionista/atualizarRecepcionistaRequest.json")));
-        }
+        salvarRecepcionistaRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/recepcionista/salvarRecepcionistaRequest.json")));
+        atualizarRecepcionistaRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/recepcionista/atualizarRecepcionistaRequest.json")));
     }
 
     @Test

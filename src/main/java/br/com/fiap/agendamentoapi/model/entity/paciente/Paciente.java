@@ -31,6 +31,12 @@ public class Paciente {
     @Column(nullable = false, unique = true, length = 11)
     private String cpf;
 
+    @Column(nullable = false, unique = true, length = 100)
+    private String email;
+
+    @Column(nullable = false, length = 15)
+    private String telefone;
+
     @Column(nullable = false, length = 255)
     private String endereco;
 

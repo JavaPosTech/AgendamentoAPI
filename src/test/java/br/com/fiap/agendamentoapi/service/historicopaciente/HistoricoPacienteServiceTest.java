@@ -4,6 +4,7 @@ import br.com.fiap.agendamentoapi.config.AbstractTest;
 import br.com.fiap.agendamentoapi.exceptions.HistoricoPacienteNaoEncontradoException;
 import br.com.fiap.agendamentoapi.model.request.historicopaciente.AtualizarHistoricoPacienteRequest;
 import br.com.fiap.agendamentoapi.model.request.historicopaciente.SalvarHistoricoPacienteRequest;
+import br.com.fiap.agendamentoapi.repository.historicopaciente.HistoricoPacienteRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,9 @@ class HistoricoPacienteServiceTest extends AbstractTest {
 
     @Autowired
     private HistoricoPacienteService historicoPacienteService;
+
+    @Autowired
+    private HistoricoPacienteRepository historicoPacienteRepository;
 
     @Test
     void getHistoricosTest() {
@@ -43,6 +47,38 @@ class HistoricoPacienteServiceTest extends AbstractTest {
                 "Nenhuma alergia conhecida.",
                 "Solicitada nova avaliação clínica."
         )));
+
+        var historico = historicoPacienteRepository.findById(1).orElseThrow();
+
+        Assertions.assertEquals("Dor de cabeça persistente", historico.getQueixaPrincipal());
+        Assertions.assertEquals("Paciente relata aumento da frequência das dores.", historico.getHistoricoDoenca());
+        Assertions.assertEquals("Solicitada nova avaliação clínica.", historico.getObservacoes());
+    }
+
+    @Test
+    void atualizarMantemCamposOpcionaisOmitidosTest() {
+        var historicoAntes = historicoPacienteRepository.findById(1).orElseThrow();
+
+        var queixaOriginal = historicoAntes.getQueixaPrincipal();
+        var observacoesOriginais = historicoAntes.getObservacoes();
+
+        Assertions.assertNotNull(queixaOriginal);
+        Assertions.assertNotNull(observacoesOriginais);
+
+        historicoPacienteService.atualizar(1, new AtualizarHistoricoPacienteRequest(
+                null,
+                "Paciente relata melhora do quadro.",
+                "Dipirona 500mg",
+                "Nenhuma alergia conhecida.",
+                null
+        ));
+
+        var historicoDepois = historicoPacienteRepository.findById(1).orElseThrow();
+
+        Assertions.assertEquals(queixaOriginal, historicoDepois.getQueixaPrincipal());
+        Assertions.assertEquals(observacoesOriginais, historicoDepois.getObservacoes());
+        Assertions.assertEquals("Paciente relata melhora do quadro.", historicoDepois.getHistoricoDoenca());
+        Assertions.assertEquals("Dipirona 500mg", historicoDepois.getMedicamentos());
     }
 
     @Test
@@ -62,6 +98,7 @@ class HistoricoPacienteServiceTest extends AbstractTest {
     @Test
     void deletarTest() {
         Assertions.assertDoesNotThrow(() -> historicoPacienteService.deletar(1));
+        Assertions.assertFalse(historicoPacienteRepository.existsById(1));
     }
 
     @Test

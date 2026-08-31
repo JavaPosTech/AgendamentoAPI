@@ -6,8 +6,9 @@ import br.com.fiap.agendamentoapi.model.request.historicopaciente.SalvarHistoric
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface HistoricoPacienteMapper {
 
     @Mapping(target = "id", ignore = true)
