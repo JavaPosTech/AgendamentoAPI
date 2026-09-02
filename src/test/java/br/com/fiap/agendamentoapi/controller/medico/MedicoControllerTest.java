@@ -4,11 +4,13 @@ import br.com.fiap.agendamentoapi.config.AbstractControllerTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+@WithMockUser(roles = "ADMINISTRADOR")
 @SpringBootTest
 class MedicoControllerTest extends AbstractControllerTest {
 

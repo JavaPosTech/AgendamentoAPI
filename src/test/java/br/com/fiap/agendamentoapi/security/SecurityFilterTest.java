@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,7 +35,7 @@ class SecurityFilterTest extends AbstractControllerTest {
 
     @Test
     void tokenDeRecepcionistaNaoAcessaEndpointRestritoTest() throws Exception {
-        mockMvc.perform(get("/v1/recepcionista").header("Authorization", "Bearer " + gerarTokenPara("fernanda.lima")))
+        mockMvc.perform(delete("/v1/recepcionista/1").header("Authorization", "Bearer " + gerarTokenPara("fernanda.lima")))
                 .andExpect(status().isForbidden());
     }
 

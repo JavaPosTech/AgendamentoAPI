@@ -27,17 +27,35 @@ public class SecurityConfig {
             "/swagger-ui.html"
     };
 
-    private static final String[] ENDPOINTS_CADASTRO_PUBLICO = {
-            "/v1/medico",
-            "/v1/paciente",
-            "/v1/enfermeiro"
+    private static final String[] PERFIS_NAO_PACIENTE = {
+            "ADMINISTRADOR",
+            "MEDICO",
+            "ENFERMEIRO",
+            "RECEPCIONISTA"
     };
 
-    private static final String[] ENDPOINTS_ADMINISTRADOR = {
+    private static final String[] GESTAO_PESSOAL = {
+            "/v1/medico",
+            "/v1/medico/**",
+            "/v1/enfermeiro",
+            "/v1/enfermeiro/**",
             "/v1/recepcionista",
-            "/v1/recepcionista/**",
+            "/v1/recepcionista/**"
+    };
+
+    private static final String[] PACIENTE_CADASTRO = {
+            "/v1/paciente",
+            "/v1/paciente/**"
+    };
+
+    private static final String[] HISTORICO_PACIENTE = {
             "/v1/historico-paciente",
             "/v1/historico-paciente/**"
+    };
+
+    private static final String[] AGENDAMENTO = {
+            "/v1/agendamento",
+            "/v1/agendamento/**"
     };
 
     @Bean
@@ -51,8 +69,19 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(ENDPOINTS_PUBLICOS).permitAll()
-                        .requestMatchers(ENDPOINTS_ADMINISTRADOR).hasRole("ADMINISTRADOR")
-                        .requestMatchers(HttpMethod.POST, ENDPOINTS_CADASTRO_PUBLICO).permitAll()
+                        .requestMatchers(HttpMethod.GET, GESTAO_PESSOAL).hasAnyRole(PERFIS_NAO_PACIENTE)
+                        .requestMatchers(GESTAO_PESSOAL).hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.POST, "/v1/paciente").hasRole("RECEPCIONISTA")
+                        .requestMatchers(HttpMethod.DELETE, PACIENTE_CADASTRO).hasRole("ADMINISTRADOR")
+                        .requestMatchers(PACIENTE_CADASTRO).hasAnyRole(PERFIS_NAO_PACIENTE)
+                        .requestMatchers(HttpMethod.POST, HISTORICO_PACIENTE).hasAnyRole("MEDICO", "RECEPCIONISTA")
+                        .requestMatchers(HttpMethod.PATCH, HISTORICO_PACIENTE).hasAnyRole("MEDICO", "RECEPCIONISTA")
+                        .requestMatchers(HttpMethod.GET, HISTORICO_PACIENTE).hasAnyRole("MEDICO", "RECEPCIONISTA", "ENFERMEIRO")
+                        .requestMatchers(HttpMethod.DELETE, HISTORICO_PACIENTE).hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.POST, AGENDAMENTO).hasAnyRole("MEDICO", "RECEPCIONISTA", "ENFERMEIRO")
+                        .requestMatchers(HttpMethod.PATCH, AGENDAMENTO).hasRole("RECEPCIONISTA")
+                        .requestMatchers(HttpMethod.DELETE, AGENDAMENTO).hasRole("RECEPCIONISTA")
+                        .requestMatchers(HttpMethod.GET, AGENDAMENTO).hasAnyRole("MEDICO", "RECEPCIONISTA", "ENFERMEIRO", "PACIENTE")
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(globalExceptionHandler)
