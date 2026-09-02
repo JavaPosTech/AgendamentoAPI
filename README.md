@@ -276,6 +276,8 @@ Todas as rotas abaixo são relativas ao context path **`/AgendamentoAPI`**.
 
 > ℹ️ O cadastro de paciente exige, além dos dados pessoais, `email` (único e validado) e `telefone`. O agendamento aceita um campo opcional `observacao`.
 
+> ℹ️ Ao agendar (`POST`) ou remarcar (`PATCH`) uma consulta, a API consulta a agenda do médico e exige um **intervalo mínimo de 1 hora** entre as consultas dele. Um horário dentro desse intervalo responde `409` com o título `Horário Indisponível!`; uma consulta exatamente 1 hora antes ou depois de outra é aceita. Na remarcação, a própria consulta é desconsiderada na verificação, então confirmar o horário atual não gera conflito.
+
 > ℹ️ A exclusão é **lógica**: o registro não é removido do banco, apenas tem sua situação de cadastro alterada para `EXCLUIDO` — e, junto com ele, o usuário perde o acesso (o login passa a responder `403`). A única exceção é o histórico do paciente, que não tem situação de cadastro e é removido de fato.
 
 > ℹ️ As listagens são paginadas e a numeração começa em **1**. Utilize os parâmetros `page`, `size` e `sort` (por exemplo, `/v1/paciente?page=1&size=20&sort=nome`).

@@ -1,0 +1,6 @@
+{
+  "medicoId": 1,
+  "pacienteId": 2,
+  "dataHoraConsulta": "22/08/2026 - 08:30:00",
+  "observacao": "Consulta dentro do intervalo mínimo do médico."
+}

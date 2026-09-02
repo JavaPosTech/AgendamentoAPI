@@ -44,6 +44,13 @@ public abstract class AbstractControllerTest {
                 .andExpect(status().isOk());
     }
 
+    protected void testPostStatusConflict(String url, String requestBody) throws Exception {
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isConflict());
+    }
+
     protected void testPatch(String url, String requestBody) throws Exception {
         mockMvc.perform(patch(url)
                         .contentType(MediaType.APPLICATION_JSON)
