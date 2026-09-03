@@ -144,6 +144,19 @@ public class GlobalExceptionHandler implements AuthenticationEntryPoint, AccessD
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(MedicoIndisponivelException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMedicoIndisponivelException(MedicoIndisponivelException ex, HttpServletRequest pHttpServletRequest) {
+
+        var response = new ErrorResponseDTO(
+                HttpStatus.CONFLICT.value(),
+                "Horário Indisponível!",
+                pHttpServletRequest.getRequestURI(),
+                "/AgendamentoAPI/problems/medico-indisponivel",
+                ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponseDTO> handleEntityNotFoundException(EntityNotFoundException ex, HttpServletRequest pHttpServletRequest) {
 

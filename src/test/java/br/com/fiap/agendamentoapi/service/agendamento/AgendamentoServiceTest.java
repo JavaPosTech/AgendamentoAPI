@@ -3,6 +3,7 @@ package br.com.fiap.agendamentoapi.service.agendamento;
 import br.com.fiap.agendamentoapi.config.AbstractTest;
 import br.com.fiap.agendamentoapi.exceptions.ConsultaNaoEncontradaException;
 import br.com.fiap.agendamentoapi.exceptions.HorarioConsultaIndisponivelException;
+import br.com.fiap.agendamentoapi.exceptions.MedicoIndisponivelException;
 import br.com.fiap.agendamentoapi.model.request.agendamento.AtualizarAgendamentoRequest;
 import br.com.fiap.agendamentoapi.model.request.agendamento.SalvarAgendamentoRequest;
 import br.com.fiap.agendamentoapi.repository.agendamento.AgendamentoRepository;
@@ -95,9 +96,53 @@ class AgendamentoServiceTest extends AbstractTest {
     }
 
     @Test
+    void salvarRespeitandoIntervaloMinimoTest() {
+        var agendamento = agendamentoRepository.findById(1).orElseThrow();
+
+        Assertions.assertDoesNotThrow(() -> agendamentoService.salvar(new SalvarAgendamentoRequest(
+                agendamento.getMedico().getId(),
+                2,
+                agendamento.getDataHoraConsulta().minusHours(1),
+                "Consulta uma hora antes da anterior."
+        )));
+    }
+
+    @Test
+    void salvarTestComMedicoIndisponivel() {
+        var agendamento = agendamentoRepository.findById(1).orElseThrow();
+
+        Assertions.assertThrows(MedicoIndisponivelException.class, () -> agendamentoService.salvar(new SalvarAgendamentoRequest(
+                agendamento.getMedico().getId(),
+                2,
+                agendamento.getDataHoraConsulta().plusMinutes(30),
+                "Consulta dentro do intervalo mínimo."
+        )));
+    }
+
+    @Test
     void atualizarTest() {
         Assertions.assertDoesNotThrow(() -> agendamentoService.atualizar(1, new AtualizarAgendamentoRequest(
                 LocalDateTime.now(),
+                "Consulta remarcada."
+        )));
+    }
+
+    @Test
+    void atualizarMantemProprioHorarioTest() {
+        var agendamento = agendamentoRepository.findById(1).orElseThrow();
+
+        Assertions.assertDoesNotThrow(() -> agendamentoService.atualizar(1, new AtualizarAgendamentoRequest(
+                agendamento.getDataHoraConsulta(),
+                "Consulta confirmada no mesmo horário."
+        )));
+    }
+
+    @Test
+    void atualizarTestComMedicoIndisponivel() {
+        var agendamento = agendamentoRepository.findById(1).orElseThrow();
+
+        Assertions.assertThrows(MedicoIndisponivelException.class, () -> agendamentoService.atualizar(1, new AtualizarAgendamentoRequest(
+                agendamento.getDataHoraConsulta().plusMinutes(90),
                 "Consulta remarcada."
         )));
     }

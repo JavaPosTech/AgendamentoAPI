@@ -22,6 +22,8 @@ class AgendamentoControllerTest extends AbstractControllerTest {
 
     private String salvarAgendamentoRequest;
 
+    private String salvarAgendamentoMedicoIndisponivelRequest;
+
     private String atualizarAgendamentoRequest;
 
     private String atualizarAgendamentoParcialRequest;
@@ -30,6 +32,7 @@ class AgendamentoControllerTest extends AbstractControllerTest {
     void setUp() throws IOException {
         if (salvarAgendamentoRequest == null && atualizarAgendamentoRequest == null) {
             salvarAgendamentoRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/agendamento/salvarAgendamentoRequest.json")));
+            salvarAgendamentoMedicoIndisponivelRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/agendamento/salvarAgendamentoMedicoIndisponivelRequest.json")));
             atualizarAgendamentoRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/agendamento/atualizarAgendamentoRequest.json")));
             atualizarAgendamentoParcialRequest = new String(Files.readAllBytes(Paths.get("src/test/resources/agendamento/atualizarAgendamentoParcialRequest.json")));
         }
@@ -51,6 +54,11 @@ class AgendamentoControllerTest extends AbstractControllerTest {
     @Test
     void salvarTest() throws Exception {
         testPost("/v1/agendamento", salvarAgendamentoRequest);
+    }
+
+    @Test
+    void salvarComMedicoIndisponivelTest() throws Exception {
+        testPostStatusConflict("/v1/agendamento", salvarAgendamentoMedicoIndisponivelRequest);
     }
 
     @Test

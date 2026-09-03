@@ -13,6 +13,10 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Intege
 
     boolean existsByMedicoIdAndDataHoraConsulta(Integer medicoId, LocalDateTime dataHoraConsulta);
 
+    boolean existsByMedicoIdAndDataHoraConsultaAfterAndDataHoraConsultaBefore(Integer medicoId, LocalDateTime inicioIntervalo, LocalDateTime fimIntervalo);
+
+    boolean existsByMedicoIdAndIdNotAndDataHoraConsultaAfterAndDataHoraConsultaBefore(Integer medicoId, Integer agendamentoId, LocalDateTime inicioIntervalo, LocalDateTime fimIntervalo);
+
     boolean existsByPacienteIdAndDataHoraConsulta(Integer pacienteId, LocalDateTime dataHoraConsulta);
 
     Page<Agendamento> findByPacienteId(Integer pacienteId, Pageable pageable);

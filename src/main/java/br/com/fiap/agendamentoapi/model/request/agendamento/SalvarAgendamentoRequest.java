@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-@Schema(description = "Representa o modelo de requisição para criar um Agendamento.")
+@Schema(description = "Representa o modelo de requisição para criar um Agendamento. O médico informado precisa ter um intervalo mínimo de 1 hora entre as consultas.")
 public record SalvarAgendamentoRequest(
 
         @NotNull(message = "O campo 'medicoId' é obrigatório!")
