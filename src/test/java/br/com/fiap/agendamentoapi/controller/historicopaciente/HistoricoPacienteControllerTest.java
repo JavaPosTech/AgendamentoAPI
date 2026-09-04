@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-@WithMockUser(roles = "ADMINISTRADOR")
+@WithMockUser(roles = "RECEPCIONISTA")
 @SpringBootTest
 class HistoricoPacienteControllerTest extends AbstractControllerTest {
 
@@ -48,6 +48,7 @@ class HistoricoPacienteControllerTest extends AbstractControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMINISTRADOR")
     void deletarTest() throws Exception {
         testDelete("/v1/historico-paciente/1");
     }

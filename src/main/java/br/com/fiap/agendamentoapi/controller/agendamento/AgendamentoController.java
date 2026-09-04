@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,8 +26,8 @@ public class AgendamentoController {
     private final AgendamentoService agendamentoService;
 
     @GetMapping
-    public ResponseEntity<PageResponse<AgendamentoDTO>> listar(@Parameter(hidden = true) @PageableDefault(size = 100, sort = "id") Pageable pageable) {
-        return ResponseEntity.ok(agendamentoService.getAgendamentos(pageable));
+    public ResponseEntity<PageResponse<AgendamentoDTO>> listar(@Parameter(hidden = true) @PageableDefault(size = 100, sort = "id") Pageable pageable, @Parameter(hidden = true) Authentication authentication) {
+        return ResponseEntity.ok(agendamentoService.getAgendamentos(pageable, authentication));
     }
 
     @PostMapping
@@ -37,5 +38,11 @@ public class AgendamentoController {
     @PatchMapping("/{id}")
     public ResponseEntity<MensagemSucessoResponse> atualizar(@PathVariable Integer id, @RequestBody @Valid AtualizarAgendamentoRequest atualizarAgendamentoRequest) {
         return ResponseEntity.ok().body(agendamentoService.atualizar(id, atualizarAgendamentoRequest));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancelar(@PathVariable Integer id) {
+        agendamentoService.cancelar(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -227,7 +227,12 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiJ9...
 
 O token expira em 24 horas (configurável via `JWT_EXPIRATION_MS`). Após expirar, é necessário realizar login novamente.
 
-> ⚠️ Cadastro (`POST`) de Médico, Paciente e Enfermeiro **não exige token** (autocadastro livre). Todas as demais operações — listar, atualizar e excluir — exigem um usuário autenticado, e as rotas de Recepcionista e de Histórico do Paciente exigem, além disso, a role `ADMINISTRADOR` em todos os métodos.
+> ⚠️ **Não há autocadastro:** todo cadastro (`POST`) exige token.
+> - **Médico, Enfermeiro e Recepcionista:** criar, atualizar e excluir → **só `ADMINISTRADOR`**; listar → todos os perfis **exceto `PACIENTE`**.
+> - **Paciente:** criar → só `RECEPCIONISTA`; **excluir → só `ADMINISTRADOR`**; listar/atualizar → todos **exceto `PACIENTE`**.
+> - A role `PACIENTE` não acessa nenhum cadastro — só `GET /v1/agendamento` (as próprias consultas).
+> - **Histórico do Paciente:** criar e atualizar → `MEDICO` ou `RECEPCIONISTA`; visualizar → `MEDICO`, `RECEPCIONISTA` ou `ENFERMEIRO`; excluir → `ADMINISTRADOR`. Fora do `DELETE`, o `ADMINISTRADOR` não acessa o histórico.
+> - **Consultas (agendamento):** marcar → `MEDICO`, `RECEPCIONISTA` ou `ENFERMEIRO`; remarcar (`PATCH`) e cancelar (`DELETE`) → **só `RECEPCIONISTA`**; visualizar → `MEDICO`, `RECEPCIONISTA`, `ENFERMEIRO` ou `PACIENTE`. O `ADMINISTRADOR` não acessa consultas. Quando quem consulta é um `PACIENTE`, o `GET` retorna **apenas as consultas dele**; os demais papéis veem todas. O cancelamento remove o registro de fato (a tabela `agendamento` não tem situação de cadastro).
 
 <br>
 
@@ -248,33 +253,36 @@ Todas as rotas abaixo são relativas ao context path **`/AgendamentoAPI`**.
 | Método   | Rota                  | Autenticação | Descrição                                        |
 | -------- | --------------------- | ------------ | ------------------------------------------------ |
 | `POST`   | `/v1/auth/login`      | Pública      | Autentica o usuário e devolve o token JWT        |
-| `GET`    | `/v1/medico`          | Requerida    | Lista os médicos (paginado)                      |
-| `POST`   | `/v1/medico`          | Pública      | Cadastra um médico                               |
-| `PATCH`  | `/v1/medico/{id}`     | Requerida    | Atualiza os dados de um médico                   |
-| `DELETE` | `/v1/medico/{id}`     | Requerida    | Exclui logicamente um médico                     |
-| `GET`    | `/v1/enfermeiro`      | Requerida    | Lista os enfermeiros (paginado)                  |
-| `POST`   | `/v1/enfermeiro`      | Pública      | Cadastra um enfermeiro                           |
-| `PATCH`  | `/v1/enfermeiro/{id}` | Requerida    | Atualiza os dados de um enfermeiro               |
-| `DELETE` | `/v1/enfermeiro/{id}` | Requerida    | Exclui logicamente um enfermeiro                 |
-| `GET`    | `/v1/paciente`        | Requerida    | Lista os pacientes (paginado)                    |
-| `POST`   | `/v1/paciente`        | Pública      | Cadastra um paciente                             |
-| `PATCH`  | `/v1/paciente/{id}`   | Requerida    | Atualiza os dados de um paciente                 |
-| `DELETE` | `/v1/paciente/{id}`   | Requerida    | Exclui logicamente um paciente                   |
-| `GET`    | `/v1/recepcionista`   | `ADMINISTRADOR` | Lista os recepcionistas (paginado)            |
+| `GET`    | `/v1/medico`          | Autenticado, exceto `PACIENTE` | Lista os médicos (paginado)           |
+| `POST`   | `/v1/medico`          | `ADMINISTRADOR` | Cadastra um médico                            |
+| `PATCH`  | `/v1/medico/{id}`     | `ADMINISTRADOR` | Atualiza os dados de um médico                |
+| `DELETE` | `/v1/medico/{id}`     | `ADMINISTRADOR` | Exclui logicamente um médico                  |
+| `GET`    | `/v1/enfermeiro`      | Autenticado, exceto `PACIENTE` | Lista os enfermeiros (paginado)        |
+| `POST`   | `/v1/enfermeiro`      | `ADMINISTRADOR` | Cadastra um enfermeiro                        |
+| `PATCH`  | `/v1/enfermeiro/{id}` | `ADMINISTRADOR` | Atualiza os dados de um enfermeiro            |
+| `DELETE` | `/v1/enfermeiro/{id}` | `ADMINISTRADOR` | Exclui logicamente um enfermeiro              |
+| `GET`    | `/v1/paciente`        | Autenticado, exceto `PACIENTE` | Lista os pacientes (paginado)          |
+| `POST`   | `/v1/paciente`        | `RECEPCIONISTA` | Cadastra um paciente                          |
+| `PATCH`  | `/v1/paciente/{id}`   | Autenticado, exceto `PACIENTE` | Atualiza os dados de um paciente       |
+| `DELETE` | `/v1/paciente/{id}`   | `ADMINISTRADOR` | Exclui logicamente um paciente                |
+| `GET`    | `/v1/recepcionista`   | Autenticado, exceto `PACIENTE` | Lista os recepcionistas (paginado)    |
 | `POST`   | `/v1/recepcionista`   | `ADMINISTRADOR` | Cadastra um recepcionista                     |
 | `PATCH`  | `/v1/recepcionista/{id}` | `ADMINISTRADOR` | Atualiza os dados de um recepcionista      |
 | `DELETE` | `/v1/recepcionista/{id}` | `ADMINISTRADOR` | Exclui logicamente um recepcionista        |
-| `GET`    | `/v1/historico-paciente` | `ADMINISTRADOR` | Lista os históricos dos pacientes (paginado) |
-| `POST`   | `/v1/historico-paciente` | `ADMINISTRADOR` | Cadastra um histórico de paciente          |
-| `PATCH`  | `/v1/historico-paciente/{id}` | `ADMINISTRADOR` | Atualiza um histórico de paciente     |
+| `GET`    | `/v1/historico-paciente` | `MEDICO`, `RECEPCIONISTA` ou `ENFERMEIRO` | Lista os históricos dos pacientes (paginado) |
+| `POST`   | `/v1/historico-paciente` | `MEDICO` ou `RECEPCIONISTA` | Cadastra um histórico de paciente |
+| `PATCH`  | `/v1/historico-paciente/{id}` | `MEDICO` ou `RECEPCIONISTA` | Atualiza um histórico de paciente |
 | `DELETE` | `/v1/historico-paciente/{id}` | `ADMINISTRADOR` | Exclui um histórico de paciente       |
-| `GET`    | `/v1/agendamento`     | Requerida    | Lista as consultas agendadas (paginado)          |
-| `POST`   | `/v1/agendamento`     | Requerida    | Agenda uma nova consulta                         |
-| `PATCH`  | `/v1/agendamento/{id}`| Requerida    | Atualiza a data/hora e a observação de uma consulta |
+| `GET`    | `/v1/agendamento`     | `MEDICO`, `RECEPCIONISTA`, `ENFERMEIRO` ou `PACIENTE` | Lista as consultas agendadas (paginado); o `PACIENTE` recebe só as próprias |
+| `POST`   | `/v1/agendamento`     | `MEDICO`, `RECEPCIONISTA` ou `ENFERMEIRO` | Agenda uma nova consulta            |
+| `PATCH`  | `/v1/agendamento/{id}`| `RECEPCIONISTA` | Remarca a data/hora e atualiza a observação de uma consulta |
+| `DELETE` | `/v1/agendamento/{id}`| `RECEPCIONISTA` | Cancela (remove) uma consulta agendada        |
 
 > ℹ️ O `PATCH` é uma **atualização parcial**: **nenhum campo é obrigatório**. Envie somente os que deseja alterar — os ausentes (e também os enviados como string vazia ou só com espaços) preservam o valor atual. As validações de formato continuam valendo para os campos que forem enviados preenchidos: um `email` inválido ou um `cpf` fora dos 11 caracteres ainda respondem `400`. Em contrapartida, o Jackson está em modo estrito, então um campo **desconhecido** no JSON derruba a requisição com `400`.
 
-> ℹ️ O cadastro de paciente exige, além dos dados pessoais, `email` (único e validado) e `telefone`. O agendamento aceita um campo opcional `observacao`.
+> ℹ️ O cadastro de paciente exige, além dos dados pessoais, `email` (único e validado) e `telefone`. O agendamento exige `medicoId`, `pacienteId` e `dataHoraConsulta`; `observacao` é opcional.
+
+> ⚠️ **Agenda do paciente:** não é possível marcar (`POST`) nem remarcar (`PATCH`) uma consulta se o paciente já tiver outra agendada para a mesma data/hora — a API responde `409 Horário de Consulta Indisponível!`. Na remarcação, a própria consulta é desconsiderada, então confirmar o horário atual não gera conflito. Do lado do médico, quem cobre esse caso é o intervalo mínimo descrito abaixo.
 
 > ℹ️ Ao agendar (`POST`) ou remarcar (`PATCH`) uma consulta, a API consulta a agenda do médico e exige um **intervalo mínimo de 1 hora** entre as consultas dele. Um horário dentro desse intervalo responde `409` com o título `Horário Indisponível!`; uma consulta exatamente 1 hora antes ou depois de outra é aceita. Na remarcação, a própria consulta é desconsiderada na verificação, então confirmar o horário atual não gera conflito.
 

@@ -6,6 +6,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.ResultActions;
+
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -14,90 +17,96 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 class AutorizacaoAdministradorTest extends AbstractControllerTest {
 
-    private static final String RECEPCIONISTA = "/v1/recepcionista";
-
-    private static final String HISTORICO_PACIENTE = "/v1/historico-paciente";
+    private static final List<String> GESTAO_PESSOAL = List.of("/v1/medico", "/v1/enfermeiro", "/v1/recepcionista");
 
     @Test
     @WithMockUser(roles = "ADMINISTRADOR")
-    void administradorAcessaRecepcionistaTest() throws Exception {
-        mockMvc.perform(get(RECEPCIONISTA)).andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMINISTRADOR")
-    void administradorAcessaHistoricoPacienteTest() throws Exception {
-        mockMvc.perform(get(HISTORICO_PACIENTE)).andExpect(status().isOk());
+    void administradorGerenciaMedicoEnfermeiroERecepcionistaTest() throws Exception {
+        for (String url : GESTAO_PESSOAL) {
+            mockMvc.perform(get(url)).andExpect(status().isOk());
+            criar(url).andExpect(status().isBadRequest());
+        }
     }
 
     @Test
     @WithMockUser(roles = "MEDICO")
-    void medicoNaoAcessaRecepcionistaTest() throws Exception {
-        assertTodosOsMetodosNegados(RECEPCIONISTA);
-    }
-
-    @Test
-    @WithMockUser(roles = "MEDICO")
-    void medicoNaoAcessaHistoricoPacienteTest() throws Exception {
-        assertTodosOsMetodosNegados(HISTORICO_PACIENTE);
+    void medicoListaMasNaoGerenciaTest() throws Exception {
+        assertListaMasNaoGerencia();
     }
 
     @Test
     @WithMockUser(roles = "ENFERMEIRO")
-    void enfermeiroNaoAcessaHistoricoPacienteTest() throws Exception {
-        assertTodosOsMetodosNegados(HISTORICO_PACIENTE);
+    void enfermeiroListaMasNaoGerenciaTest() throws Exception {
+        assertListaMasNaoGerencia();
     }
 
     @Test
     @WithMockUser(roles = "RECEPCIONISTA")
-    void recepcionistaNaoAcessaProprioCadastroTest() throws Exception {
-        assertTodosOsMetodosNegados(RECEPCIONISTA);
+    void recepcionistaListaMasNaoGerenciaTest() throws Exception {
+        assertListaMasNaoGerencia();
     }
 
     @Test
     @WithMockUser(roles = "PACIENTE")
-    void pacienteNaoAcessaHistoricoPacienteTest() throws Exception {
-        assertTodosOsMetodosNegados(HISTORICO_PACIENTE);
+    void pacienteNaoListaNemGerenciaTest() throws Exception {
+        for (String url : GESTAO_PESSOAL) {
+            mockMvc.perform(get(url)).andExpect(status().isForbidden());
+            assertGerenciaNegada(url);
+        }
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRADOR")
+    void administradorExcluiPacienteTest() throws Exception {
+        mockMvc.perform(delete("/v1/paciente/1")).andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser(roles = "RECEPCIONISTA")
+    void recepcionistaNaoExcluiPacienteTest() throws Exception {
+        mockMvc.perform(delete("/v1/paciente/1")).andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(roles = "MEDICO")
-    void acessoNegadoRetornaCorpoPadronizadoTest() throws Exception {
-        mockMvc.perform(get(RECEPCIONISTA))
+    void medicoNaoExcluiPacienteTest() throws Exception {
+        mockMvc.perform(delete("/v1/paciente/1")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "MEDICO")
+    void gerenciaNegadaRetornaCorpoPadronizadoTest() throws Exception {
+        criar("/v1/medico")
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.status").value(403))
                 .andExpect(jsonPath("$.title").value("Acesso Negado!"))
-                .andExpect(jsonPath("$.instance").value("/v1/recepcionista"));
+                .andExpect(jsonPath("$.instance").value("/v1/medico"));
     }
 
     @Test
     @WithAnonymousUser
     void semAutenticacaoRecebeNaoAutorizadoTest() throws Exception {
-        mockMvc.perform(get(RECEPCIONISTA))
+        mockMvc.perform(get("/v1/recepcionista"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401))
                 .andExpect(jsonPath("$.title").value("Não Autorizado!"));
-
-        mockMvc.perform(get(HISTORICO_PACIENTE))
-                .andExpect(status().isUnauthorized());
     }
 
-    @Test
-    @WithMockUser(roles = "MEDICO")
-    void regraDeAdministradorNaoAfetaDemaisEndpointsTest() throws Exception {
-        mockMvc.perform(get("/v1/medico")).andExpect(status().isOk());
-        mockMvc.perform(get("/v1/paciente")).andExpect(status().isOk());
-        mockMvc.perform(get("/v1/enfermeiro")).andExpect(status().isOk());
+    private void assertListaMasNaoGerencia() throws Exception {
+        for (String url : GESTAO_PESSOAL) {
+            mockMvc.perform(get(url)).andExpect(status().isOk());
+            assertGerenciaNegada(url);
+        }
     }
 
-    private void assertTodosOsMetodosNegados(String url) throws Exception {
-        mockMvc.perform(get(url))
-                .andExpect(status().isForbidden());
+    private ResultActions criar(String url) throws Exception {
+        return mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"));
+    }
 
-        mockMvc.perform(post(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isForbidden());
+    private void assertGerenciaNegada(String url) throws Exception {
+        criar(url).andExpect(status().isForbidden());
 
         mockMvc.perform(patch(url + "/1")
                         .contentType(MediaType.APPLICATION_JSON)
