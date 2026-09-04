@@ -16,7 +16,7 @@ public class TestDataBaseConfig {
     @Value("${DATABASE_USER:postgres}")
     private String usuario;
 
-    @Value("${DATABASE_PASSWORD:Ggu171905**}")
+    @Value("${DATABASE_PASSWORD:fiap@2026}")
     private String senha;
 
     @Value("${DATABASE_PORT:8745}")
