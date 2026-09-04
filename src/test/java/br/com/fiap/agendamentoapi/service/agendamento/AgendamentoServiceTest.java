@@ -71,7 +71,7 @@ class AgendamentoServiceTest extends AbstractTest {
 
         agendamentoService.salvar(new SalvarAgendamentoRequest(1, 1, dataHora, null));
 
-        Assertions.assertThrows(HorarioConsultaIndisponivelException.class, () -> agendamentoService.salvar(
+        Assertions.assertThrows(MedicoIndisponivelException.class, () -> agendamentoService.salvar(
                 new SalvarAgendamentoRequest(1, 2, dataHora, null)));
     }
 
@@ -145,6 +145,24 @@ class AgendamentoServiceTest extends AbstractTest {
                 agendamento.getDataHoraConsulta().plusMinutes(90),
                 "Consulta remarcada."
         )));
+    }
+
+    @Test
+    void atualizarComPacienteOcupadoNoHorarioLancaExcecaoTest() {
+        var primeiroHorario = LocalDateTime.of(2027, 2, 10, 8, 0, 0);
+        var segundoHorario = LocalDateTime.of(2027, 2, 10, 14, 0, 0);
+
+        agendamentoService.salvar(new SalvarAgendamentoRequest(1, 1, primeiroHorario, null));
+        agendamentoService.salvar(new SalvarAgendamentoRequest(2, 1, segundoHorario, null));
+
+        var consultaARemarcar = agendamentoRepository.findAll().stream()
+                .filter(agendamento -> segundoHorario.equals(agendamento.getDataHoraConsulta()))
+                .findFirst()
+                .orElseThrow();
+
+        Assertions.assertThrows(HorarioConsultaIndisponivelException.class, () -> agendamentoService.atualizar(
+                consultaARemarcar.getId(),
+                new AtualizarAgendamentoRequest(primeiroHorario, null)));
     }
 
     @Test

@@ -11,13 +11,13 @@ import java.time.LocalDateTime;
 @Repository
 public interface AgendamentoRepository extends JpaRepository<Agendamento, Integer> {
 
-    boolean existsByMedicoIdAndDataHoraConsulta(Integer medicoId, LocalDateTime dataHoraConsulta);
-
     boolean existsByMedicoIdAndDataHoraConsultaAfterAndDataHoraConsultaBefore(Integer medicoId, LocalDateTime inicioIntervalo, LocalDateTime fimIntervalo);
 
     boolean existsByMedicoIdAndIdNotAndDataHoraConsultaAfterAndDataHoraConsultaBefore(Integer medicoId, Integer agendamentoId, LocalDateTime inicioIntervalo, LocalDateTime fimIntervalo);
 
     boolean existsByPacienteIdAndDataHoraConsulta(Integer pacienteId, LocalDateTime dataHoraConsulta);
+
+    boolean existsByPacienteIdAndIdNotAndDataHoraConsulta(Integer pacienteId, Integer agendamentoId, LocalDateTime dataHoraConsulta);
 
     Page<Agendamento> findByPacienteId(Integer pacienteId, Pageable pageable);
 

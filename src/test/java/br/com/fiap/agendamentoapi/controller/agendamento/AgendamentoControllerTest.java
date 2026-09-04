@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -44,8 +46,17 @@ class AgendamentoControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "PACIENTE")
+    @WithMockUser(username = "pedro.almeida", roles = "PACIENTE")
     void listarComoPacienteFiltraPelasPropriasTest() throws Exception {
+        mockMvc.perform(get("/v1/agendamento"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.content[*].paciente", everyItem(is("PEDRO"))));
+    }
+
+    @Test
+    @WithMockUser(roles = "PACIENTE")
+    void listarComoPacienteSemCadastroRetornaVazioTest() throws Exception {
         mockMvc.perform(get("/v1/agendamento"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isEmpty());

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -44,6 +45,12 @@ public class PacienteService {
     public Paciente getPacienteById(Integer id) {
         log.info("Buscando informações do Paciente - ID: [{}]", id);
         return pacienteRepository.findById(id).orElseThrow(() -> new UsuarioNaoEncontradoException("Paciente não encontrado!"));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Paciente> getPacienteByLogin(String login) {
+        log.info("Buscando informações do Paciente - Login: [{}]", login);
+        return pacienteRepository.findByUsuarioLogin(login);
     }
 
     @Transactional

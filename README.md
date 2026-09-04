@@ -282,7 +282,7 @@ Todas as rotas abaixo são relativas ao context path **`/AgendamentoAPI`**.
 
 > ℹ️ O cadastro de paciente exige, além dos dados pessoais, `email` (único e validado) e `telefone`. O agendamento exige `medicoId`, `pacienteId` e `dataHoraConsulta`; `observacao` é opcional.
 
-> ⚠️ **Conflito de horário:** não é possível marcar uma consulta se o médico **ou** o paciente já tiver outra agendada para a mesma data/hora — a API responde `409 Horário de Consulta Indisponível!`.
+> ⚠️ **Agenda do paciente:** não é possível marcar (`POST`) nem remarcar (`PATCH`) uma consulta se o paciente já tiver outra agendada para a mesma data/hora — a API responde `409 Horário de Consulta Indisponível!`. Na remarcação, a própria consulta é desconsiderada, então confirmar o horário atual não gera conflito. Do lado do médico, quem cobre esse caso é o intervalo mínimo descrito abaixo.
 
 > ℹ️ Ao agendar (`POST`) ou remarcar (`PATCH`) uma consulta, a API consulta a agenda do médico e exige um **intervalo mínimo de 1 hora** entre as consultas dele. Um horário dentro desse intervalo responde `409` com o título `Horário Indisponível!`; uma consulta exatamente 1 hora antes ou depois de outra é aceita. Na remarcação, a própria consulta é desconsiderada na verificação, então confirmar o horário atual não gera conflito.
 
