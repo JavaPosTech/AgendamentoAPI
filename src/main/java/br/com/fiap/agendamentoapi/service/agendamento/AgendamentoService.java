@@ -15,6 +15,7 @@ import br.com.fiap.agendamentoapi.service.medico.MedicoService;
 import br.com.fiap.agendamentoapi.service.paciente.PacienteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -37,11 +38,13 @@ public class AgendamentoService {
 
     private final AgendamentoRepository agendamentoRepository;
 
+    private final ApplicationEventPublisher applicationEventPublisher;
+
     private static final Duration INTERVALO_MINIMO_ENTRE_CONSULTAS = Duration.ofHours(1);
 
     @Transactional(readOnly = true)
     public PageResponse<AgendamentoDTO> getAgendamentos(Pageable pageable, Authentication authentication) {
-        if (ehPaciente(authentication)) {
+        if (isPaciente(authentication)) {
             log.info("Buscando consultas do paciente autenticado - Login: [{}]", authentication.getName());
             return pacienteService.getPacienteByLogin(authentication.getName())
                     .map(paciente -> PageResponse.from(agendamentoRepository.findByPacienteId(paciente.getId(), pageable), AgendamentoDTO::new))
@@ -50,11 +53,6 @@ public class AgendamentoService {
 
         log.info("Buscando informações de todas as consultas...");
         return PageResponse.from(agendamentoRepository.findAll(pageable), AgendamentoDTO::new);
-    }
-
-    private boolean ehPaciente(Authentication authentication) {
-        return authentication != null && authentication.getAuthorities().stream()
-                .anyMatch(authority -> "ROLE_PACIENTE".equals(authority.getAuthority()));
     }
 
     @Transactional
@@ -70,7 +68,9 @@ public class AgendamentoService {
                 paciente.getNome(),
                 salvarAgendamentoRequest.dataHoraConsulta());
 
-        agendamentoRepository.save(agendamentoMapper.toEntity(salvarAgendamentoRequest, medico, paciente));
+        var agendamento = agendamentoRepository.save(agendamentoMapper.toEntity(salvarAgendamentoRequest, medico, paciente));
+
+        publicarEventoAgendamentoCriado(agendamento);
         return new MensagemSucessoResponse(201, "Consulta criada com sucesso!");
     }
 
@@ -79,9 +79,19 @@ public class AgendamentoService {
         log.info("Atualizando Consulta... - ID: [{}]", id);
         var agendamento = agendamentoRepository.findById(id).orElseThrow(() -> new ConsultaNaoEncontradaException("Consulta não encontrada!"));
 
+        var dataHoraAnterior = agendamento.getDataHoraConsulta();
+
         if (atualizarAgendamentoRequest.dataHoraConsulta() != null) {
-            validarDisponibilidadeDoPaciente(agendamento.getPaciente().getId(), atualizarAgendamentoRequest.dataHoraConsulta(), agendamento.getId());
-            validarDisponibilidadeDoMedico(agendamento.getMedico().getId(), atualizarAgendamentoRequest.dataHoraConsulta(), agendamento.getId());
+            validarDisponibilidadeDoPaciente(
+                    agendamento.getPaciente().getId(),
+                    atualizarAgendamentoRequest.dataHoraConsulta(),
+                    agendamento.getId());
+
+            validarDisponibilidadeDoMedico(
+                    agendamento.getMedico().getId(),
+                    atualizarAgendamentoRequest.dataHoraConsulta(),
+                    agendamento.getId());
+
             agendamento.setDataHoraConsulta(atualizarAgendamentoRequest.dataHoraConsulta());
         }
 
@@ -89,6 +99,7 @@ public class AgendamentoService {
             agendamento.setObservacao(atualizarAgendamentoRequest.observacao());
         }
 
+        publicarEventoAgendamentoAtualizado(agendamento, dataHoraAnterior);
         return new MensagemSucessoResponse(200, "Consulta atualizada com sucesso!");
     }
 
@@ -124,5 +135,20 @@ public class AgendamentoService {
             log.warn("Horário indisponível para o Médico! - Médico: [ID: {}] - Data Consulta: [{}]", medicoId, dataHoraConsulta);
             throw new MedicoIndisponivelException("O médico já possui uma consulta agendada nesse horário! É necessário um intervalo mínimo de 1 hora entre as consultas.");
         }
+    }
+
+    private boolean isPaciente(Authentication authentication) {
+        return authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_PACIENTE".equals(authority.getAuthority()));
+    }
+
+    private void publicarEventoAgendamentoCriado(Agendamento agendamento) {
+        var evento = agendamentoMapper.toAgendamentoCriadoEvent(agendamento);
+        applicationEventPublisher.publishEvent(evento);
+    }
+
+    private  void publicarEventoAgendamentoAtualizado(Agendamento agendamento, LocalDateTime dataHoraAnterior) {
+        var evento = agendamentoMapper.toAgendamentoAtualizadoEvent(agendamento, dataHoraAnterior);
+        applicationEventPublisher.publishEvent(evento);
     }
 }

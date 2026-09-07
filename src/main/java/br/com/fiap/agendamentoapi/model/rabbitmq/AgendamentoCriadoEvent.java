@@ -1,4 +1,4 @@
-package br.com.fiap.agendamentoapi.model.event.agendamento;
+package br.com.fiap.agendamentoapi.model.rabbitmq;
 
 import java.time.LocalDateTime;
 

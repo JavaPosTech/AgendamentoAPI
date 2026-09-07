@@ -1,8 +1,8 @@
-package br.com.fiap.agendamentoapi.service.agendamento;
+package br.com.fiap.agendamentoapi.service.rabbitmq;
 
 import br.com.fiap.agendamentoapi.config.RabbitMQConfig;
-import br.com.fiap.agendamentoapi.model.event.agendamento.AgendamentoAtualizadoEvent;
-import br.com.fiap.agendamentoapi.model.event.agendamento.AgendamentoCriadoEvent;
+import br.com.fiap.agendamentoapi.model.rabbitmq.AgendamentoAtualizadoEvent;
+import br.com.fiap.agendamentoapi.model.rabbitmq.AgendamentoCriadoEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpException;
@@ -22,7 +22,7 @@ public class AgendamentoPublisher {
     public void publicarAgendamentoCriado(AgendamentoCriadoEvent evento) {
         try {
             log.info(
-                    "Publicando evento de consulta criada - Agendamento: [ID: {}] - Event ID: [{}]",
+                    "Publicando evento de consulta criada... - Agendamento: [ID: {}] - Event ID: [{}]",
                     evento.agendamentoId(),
                     evento.eventId()
             );
@@ -33,13 +33,9 @@ public class AgendamentoPublisher {
                     evento
             );
 
-            log.info(
-                    "Evento de consulta criada publicado com sucesso - Agendamento: [ID: {}]",
-                    evento.agendamentoId()
-            );
+            log.info("Evento de consulta criada publicado com sucesso! - Agendamento: [ID: {}]", evento.agendamentoId());
         } catch (AmqpException exception) {
-            log.error(
-                    "Erro ao publicar evento de consulta criada - Agendamento: [ID: {}]",
+            log.error("Erro ao publicar evento de consulta criada! - Agendamento: [ID: {}]",
                     evento.agendamentoId(),
                     exception
             );
@@ -50,7 +46,7 @@ public class AgendamentoPublisher {
     public void publicarAgendamentoAtualizado(AgendamentoAtualizadoEvent evento) {
         try {
             log.info(
-                    "Publicando evento de consulta atualizada - Agendamento: [ID: {}] - Event ID: [{}]",
+                    "Publicando evento de consulta atualizada... - Agendamento: [ID: {}] - Event ID: [{}]",
                     evento.agendamentoId(),
                     evento.eventId()
             );
@@ -61,13 +57,10 @@ public class AgendamentoPublisher {
                     evento
             );
 
-            log.info(
-                    "Evento de consulta atualizada publicado com sucesso - Agendamento: [ID: {}]",
-                    evento.agendamentoId()
-            );
+            log.info("Evento de consulta atualizada publicado com sucesso! - Agendamento: [ID: {}]", evento.agendamentoId());
         } catch (AmqpException exception) {
             log.error(
-                    "Erro ao publicar evento de consulta atualizada - Agendamento: [ID: {}]",
+                    "Erro ao publicar evento de consulta atualizada! - Agendamento: [ID: {}]",
                     evento.agendamentoId(),
                     exception
             );

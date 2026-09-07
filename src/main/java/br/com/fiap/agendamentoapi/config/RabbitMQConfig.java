@@ -1,7 +1,7 @@
 package br.com.fiap.agendamentoapi.config;
 
-import br.com.fiap.agendamentoapi.model.event.agendamento.AgendamentoCriadoEvent;
-import br.com.fiap.agendamentoapi.model.event.agendamento.AgendamentoAtualizadoEvent;
+import br.com.fiap.agendamentoapi.model.rabbitmq.AgendamentoCriadoEvent;
+import br.com.fiap.agendamentoapi.model.rabbitmq.AgendamentoAtualizadoEvent;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -20,24 +20,15 @@ import java.util.Map;
 public class RabbitMQConfig {
 
     public static final String AGENDAMENTO_EXCHANGE = "agendamento.events";
-
-    public static final String NOTIFICACAO_AGENDAMENTO_QUEUE =  "notificacao.email.agendamento";
-
-    public static final String AGENDAMENTO_CRIADO_ROUTING_KEY = "agendamento.criado";
-
     public static final String AGENDAMENTO_CRIADO_TYPE_ID = "agendamento.criado.v1";
-
-    public static final String AGENDAMENTO_ATUALIZADO_ROUTING_KEY = "agendamento.atualizado";
-
+    public static final String AGENDAMENTO_CRIADO_ROUTING_KEY = "agendamento.criado";
     public static final String AGENDAMENTO_ATUALIZADO_TYPE_ID = "agendamento.atualizado.v1";
+    public static final String AGENDAMENTO_ATUALIZADO_ROUTING_KEY = "agendamento.atualizado";
+    public static final String NOTIFICACAO_AGENDAMENTO_QUEUE =  "notificacao.email.agendamento";
 
     @Bean
     public DirectExchange agendamentoExchange() {
-        return new DirectExchange(
-                AGENDAMENTO_EXCHANGE,
-                true,
-                false
-        );
+        return new DirectExchange(AGENDAMENTO_EXCHANGE, true, false);
     }
 
     @Bean
@@ -57,7 +48,6 @@ public class RabbitMQConfig {
 
     @Bean
     public Binding agendamentoAtualizadoBinding(Queue notificacaoAgendamentoQueue, DirectExchange agendamentoExchange) {
-
         return BindingBuilder
                 .bind(notificacaoAgendamentoQueue)
                 .to(agendamentoExchange)
