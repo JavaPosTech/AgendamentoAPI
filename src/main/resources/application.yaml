@@ -9,6 +9,12 @@ spring:
   application:
     name: agendamentoapi
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+
   jackson:
     deserialization:
       fail-on-unknown-properties: true

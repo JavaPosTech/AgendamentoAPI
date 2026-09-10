@@ -1,4 +1,4 @@
-package br.com.fiap.agendamentoapi.service.agendamento;
+package br.com.fiap.agendamentoapi.service.rabbitmq;
 
 import br.com.fiap.agendamentoapi.config.AbstractTest;
 import br.com.fiap.agendamentoapi.exceptions.ConsultaNaoEncontradaException;
@@ -7,6 +7,7 @@ import br.com.fiap.agendamentoapi.exceptions.MedicoIndisponivelException;
 import br.com.fiap.agendamentoapi.model.request.agendamento.AtualizarAgendamentoRequest;
 import br.com.fiap.agendamentoapi.model.request.agendamento.SalvarAgendamentoRequest;
 import br.com.fiap.agendamentoapi.repository.agendamento.AgendamentoRepository;
+import br.com.fiap.agendamentoapi.service.agendamento.AgendamentoService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
