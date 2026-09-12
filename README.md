@@ -126,11 +126,13 @@ O projeto disponibiliza três arquivos Compose:
 
 | Arquivo | Finalidade |
 | --- | --- |
-| `docker-compose-postgres-dev.yml` | PostgreSQL de desenvolvimento, com credenciais fixas e sem dependência do `.env`. |
-| `docker-compose-postgres-prod.yml` | PostgreSQL de produção: lê o `.env`, possui *healthcheck* e cria a rede `shared-net`. |
+| `docker-compose-postgres-dev.yml` | PostgreSQL e RabbitMQ de desenvolvimento, com credenciais fixas e sem dependência do `.env`. |
+| `docker-compose-postgres-prod.yml` | PostgreSQL e RabbitMQ de produção: leem o `.env`, possuem *healthcheck* e criam a rede `shared-net`. |
 | `docker-compose-agendamentoapi.yml` | Apenas a API, no perfil `prod`, conectando-se à `shared-net` já existente. |
 
-> ℹ️ Os dois arquivos do PostgreSQL são **idênticos aos da HistoricoAPI** e utilizam nome de projeto e de volume fixos. Isso significa que tanto faz de qual projeto o banco é iniciado: o container e os dados serão sempre os mesmos. Suba o banco **uma vez**, a partir de qualquer um dos repositórios.
+> ℹ️ A **definição do PostgreSQL** (serviço, rede `shared-net` e volume do banco) é **idêntica à da HistoricoAPI**, com nome de projeto e de volume fixos. Isso significa que tanto faz de qual projeto o banco é iniciado: o container e os dados serão sempre os mesmos. Suba o banco **uma vez**, a partir de qualquer um dos repositórios.
+
+> ℹ️ O **RabbitMQ é exclusivo da AgendamentoAPI** — a HistoricoAPI não usa mensageria. Por isso o broker sobe junto nos composes de infraestrutura **deste** repositório e **não** aparece nos da HistoricoAPI.
 
 > ⭐ **Este é o serviço dono do schema.** As migrations Flyway em `src/main/resources/db/migration/` criam todas as tabelas da fase e inserem a carga inicial de dados. Os demais microsserviços apenas consomem esse schema, portanto a AgendamentoAPI deve ser a **primeira** a subir contra um banco novo.
 
@@ -170,6 +172,12 @@ $ Exemplo: postgres
 # DATABASE_PASSWORD
 $ Exemplo: postgres@2026
 
+# RABBITMQ_USERNAME
+$ Exemplo: fiap
+
+# RABBITMQ_PASSWORD
+$ Exemplo: fiap@2026
+
 # JWT_SECRET
 $ Exemplo: uma string aleatória com pelo menos 32 caracteres
 
@@ -177,7 +185,7 @@ $ Exemplo: uma string aleatória com pelo menos 32 caracteres
 $ Exemplo: 86400000 (24 horas)
 ```
 
-As variáveis `DATABASE_*` são utilizadas tanto para **criar** o container do PostgreSQL quanto para a API se **conectar** a ele, de modo que as credenciais não têm como divergir. Se `DATABASE_PASSWORD` ou `JWT_SECRET` não estiverem preenchidas, o Compose interrompe a execução com uma mensagem explícita, em vez de subir com valores em branco.
+As variáveis `DATABASE_*` e `RABBITMQ_*` são utilizadas tanto para **criar** os containers do PostgreSQL e do RabbitMQ quanto para a API se **conectar** a eles, de modo que as credenciais não têm como divergir. Se `DATABASE_PASSWORD`, `RABBITMQ_PASSWORD` ou `JWT_SECRET` não estiverem preenchidas, o Compose interrompe a execução com uma mensagem explícita, em vez de subir com valores em branco.
 
 > ⚠️ `JWT_SECRET` e `JWT_EXPIRATION_MS` possuem valores padrão embutidos no código apenas para facilitar o desenvolvimento local. Em produção, defina obrigatoriamente um `JWT_SECRET` próprio — o valor padrão é público, pois está versionado no repositório.
 
@@ -188,7 +196,7 @@ As variáveis `DATABASE_*` são utilizadas tanto para **criar** o container do P
 Após configurar o arquivo `.env`, inicie primeiro o banco de dados e, em seguida, a API:
 
 ```bash
-# 1. PostgreSQL — também cria a rede shared-net (execute apenas uma vez)
+# 1. PostgreSQL e RabbitMQ — também criam a rede shared-net (execute apenas uma vez)
 docker compose -f docker-compose-postgres-prod.yml up -d --wait
 
 # 2. AgendamentoAPI — aplica as migrations Flyway e cria o schema

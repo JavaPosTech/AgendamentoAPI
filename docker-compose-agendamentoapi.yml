@@ -16,13 +16,25 @@ services:
       DATABASE_PORT: 5432
       DATABASE_NAME: ${DATABASE_NAME:-postgres}
       DATABASE_USER: ${DATABASE_USER:-postgres}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD:?defina DATABASE_PASSWORD no arquivo .env}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
 
-      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no arquivo .env}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-fiap}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+
+      JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-3600000}
 
     volumes:
       - ./logs:/app/logs
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:9027/AgendamentoAPI/v3/api-docs || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
 
     restart: always
 
