@@ -34,12 +34,12 @@ Context path da aplicação: **`/AgendamentoAPI`** (definido em `application.yam
 # Executar em produção local (porta 9027)
 ./gradlew bootRun --args="--spring.profiles.active=prod"
 
-# Subir apenas o PostgreSQL de desenvolvimento (host 8745 → container 5432)
+# Subir a infraestrutura de desenvolvimento — PostgreSQL (host 8745 → container 5432) e RabbitMQ (5672 / 15672)
 docker compose -f docker-compose-postgres-dev.yml up -d --wait
 
 > Na branch `ADJ-8` o único compose de banco é `docker-compose-postgres.yml` (host 8745 → container 5432); os dois arquivos `-dev`/`-prod` vêm da `ADJ-7`. Depois do merge, use os nomes acima.
 
-# Subir em modo produção (requer .env preenchido) — banco primeiro, depois a API
+# Subir em modo produção (requer .env preenchido) — infraestrutura primeiro, depois a API
 docker compose -f docker-compose-postgres-prod.yml up -d --wait
 docker compose -f docker-compose-agendamentoapi.yml up -d
 ```
@@ -112,9 +112,9 @@ Consequências práticas:
 * **Este serviço sobe primeiro** contra um banco novo, para que o schema exista antes dos demais.
 * Migration solicitada por outro serviço da fase é escrita **aqui**, não lá.
 
-A topologia Docker é: `docker-compose-postgres-prod.yml` cria o banco e a rede `shared-net`; cada serviço tem um compose só com a própria aplicação, declarando `shared-net` como rede **externa**. Dentro da rede o banco é `postgres:5432`; a porta `8745` é apenas exposição no host. Os dois compose de PostgreSQL (`docker-compose-postgres-prod.yml` e `docker-compose-postgres-dev.yml`) são **idênticos aos da HistoricoAPI**, com `name:` de projeto e de volume fixos — assim o banco é o mesmo independentemente do repositório de onde for iniciado. **Ao alterar um deles, replique no repositório irmão.**
+A topologia Docker é: `docker-compose-postgres-prod.yml` cria a infraestrutura da fase — PostgreSQL, RabbitMQ e a rede `shared-net`; cada serviço tem um compose só com a própria aplicação, declarando `shared-net` como rede **externa**. Dentro da rede o banco é `postgres:5432` e o broker é `rabbitmq:5672`; as portas `8745`, `5672` e `15672` são apenas exposição no host. A **definição do PostgreSQL** (serviço `postgres`, rede `shared-net` e volume do banco) é **idêntica à da HistoricoAPI**, com `name:` de projeto e de volume fixos — é isso que garante que o banco seja o mesmo independentemente do repositório de onde for iniciado; **ao alterá-la, replique no repositório irmão.** O **RabbitMQ é exclusivo da AgendamentoAPI** (a HistoricoAPI não tem mensageria) e por isso aparece **só nos composes daqui** — não é espelhado no repositório irmão.
 
-Um único conjunto de variáveis (`DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD`) cria o container e conecta os serviços, então as credenciais não têm como divergir. `DATABASE_PORT` não é lido pelos compose: dentro da rede é sempre `5432`.
+Um único conjunto de variáveis (`DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD`) cria o container e conecta os serviços, então as credenciais não têm como divergir. O mesmo vale para `RABBITMQ_USERNAME` e `RABBITMQ_PASSWORD`, que criam o broker e são injetadas na AgendamentoAPI. `DATABASE_PORT` não é lido pelos compose: dentro da rede é sempre `5432`.
 
 Todas as APIs da fase escutam em `9027` dentro do container no perfil `prod`, então se diferenciam pela porta publicada no host: AgendamentoAPI em `9027`, HistoricoAPI em `9028`. Ao adicionar um serviço, escolha a próxima porta livre no host e mantenha `9027` do lado do container.
 

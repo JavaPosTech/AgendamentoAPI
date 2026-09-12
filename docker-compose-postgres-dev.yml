@@ -1,7 +1,6 @@
 name: fiap-fase3-dev
 
 services:
-
   postgres:
     image: postgres:18
     container_name: postgres-fase3
@@ -29,7 +28,6 @@ services:
 
     networks:
       - shared-net
-
 
   rabbitmq:
     image: rabbitmq:4-management
@@ -59,17 +57,13 @@ services:
     networks:
       - shared-net
 
-
 volumes:
-
   postgres-data:
     name: fiap-postgres-data-dev
 
   rabbitmq-data:
     name: fiap-rabbitmq-data-dev
 
-
 networks:
-
   shared-net:
     name: shared-net
