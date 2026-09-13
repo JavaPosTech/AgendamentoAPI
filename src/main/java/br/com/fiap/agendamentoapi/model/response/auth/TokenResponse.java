@@ -5,10 +5,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "Modelo de resposta contendo o token de acesso do Usuário autenticado.")
 public record TokenResponse(
 
-        @Schema(description = "Token de acesso JWT")
+        @Schema(description = "Token de acesso JWT. É o valor a informar em Authorize.", example = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiJ9.assinatura")
         String token,
 
-        @Schema(description = "Tipo do token", example = "Bearer")
+        @Schema(description = "Tipo do token.", example = "Bearer")
         String tipo
 
 ) {

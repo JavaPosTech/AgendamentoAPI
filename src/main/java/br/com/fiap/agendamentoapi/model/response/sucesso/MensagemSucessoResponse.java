@@ -8,14 +8,14 @@ import java.time.LocalDateTime;
 @Schema(description = "Modelo de resposta padrão indicando que a operação foi concluída com sucesso.")
 public record MensagemSucessoResponse(
 
-        @Schema(description = "Código HTTP da resposta")
+        @Schema(description = "Código HTTP da resposta.", example = "201")
         int status,
 
-        @Schema(description = "Data e hora da resposta", example = "25/12/2024 - 14:30:00")
+        @Schema(type = "string", format = "dd/MM/yyyy - HH:mm:ss", description = "Data e hora da resposta.", example = "12/09/2026 - 14:30:00")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy - HH:mm:ss")
         LocalDateTime timestamp,
 
-        @Schema(description = "Mensagem de sucesso")
+        @Schema(description = "Mensagem de sucesso.", example = "Paciente criado com sucesso!")
         String mensagem
 
 ) {

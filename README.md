@@ -43,7 +43,7 @@ O código é organizado **por camada e, dentro de cada camada, por domínio** (`
 ```
 src/main/java/br/com/fiap/agendamentoapi/
 ├── config/           # DataBaseConfig, SecurityConfig, SwaggerConfig e SecurityFilter
-├── controller/       # Endpoints REST
+├── controller/       # Endpoints REST e interfaces *Docs com a documentação do Swagger
 ├── service/          # Regras de negócio
 ├── repository/       # Interfaces JpaRepository
 ├── model/
@@ -66,6 +66,8 @@ O esquema do banco é criado **exclusivamente pelo Flyway** — não há `ddl-au
 > ℹ️ Todos os domínios possuem a fatia vertical completa (entidade, repositório, mapper, request/DTO, service e controller). As tabelas `recepcionista` e `historico_paciente` fazem parte do schema da fase e também são consumidas pela HistoricoAPI.
 
 > ℹ️ O projeto **não utiliza Javadoc nem comentários explicativos** — nem no código Java, nem nos arquivos de build e de infraestrutura (`build.gradle.kts`, Compose, `Dockerfile`). A documentação dos modelos e das rotas fica nas anotações do SpringDoc (`@Schema`, `@Operation`), publicadas no Swagger UI, e todo o contexto de arquitetura, execução e infraestrutura neste `README.md`.
+
+> ℹ️ Cada controller implementa uma interface `<Dominio>Docs` (por exemplo, `MedicoDocs`), que concentra o mapeamento das rotas e as anotações do Swagger: resumo, descrição com os perfis de acesso, códigos de resposta e parâmetros. O controller fica só com a delegação para o service. A paginação das listagens é descrita pela anotação `@ParametrosPaginacao`, que já documenta a numeração a partir da página 1.
 
 <br> 
 
@@ -319,6 +321,8 @@ $ http://localhost:9027/AgendamentoAPI/swagger-ui/index.html
 ```
 
 > ⚠️ O context path diferencia maiúsculas de minúsculas: utilize `/AgendamentoAPI`, e não `/agendamentoapi`.
+
+> ℹ️ Para testar as rotas pelo Swagger, chame `POST /v1/auth/login`, copie o valor do campo `token` e cole no botão **Authorize**, sem o prefixo `Bearer`. Cada rota informa na descrição quais perfis têm acesso a ela, e os exemplos dos modelos já usam o formato de data aceito pela API.
 
 <br> 
 

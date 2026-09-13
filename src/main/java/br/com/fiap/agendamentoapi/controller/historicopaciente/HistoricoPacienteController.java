@@ -6,41 +6,37 @@ import br.com.fiap.agendamentoapi.model.request.historicopaciente.SalvarHistoric
 import br.com.fiap.agendamentoapi.model.response.page.PageResponse;
 import br.com.fiap.agendamentoapi.model.response.sucesso.MensagemSucessoResponse;
 import br.com.fiap.agendamentoapi.service.historicopaciente.HistoricoPacienteService;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/historico-paciente")
-@Tag(name = "Histórico do Paciente", description = "Endpoints relacionados ao gerenciamento do Histórico dos Pacientes")
-public class HistoricoPacienteController {
+public class HistoricoPacienteController implements HistoricoPacienteDocs {
 
     private final HistoricoPacienteService historicoPacienteService;
 
-    @GetMapping
-    public ResponseEntity<PageResponse<HistoricoPacienteDTO>> listar(@Parameter(hidden = true) @PageableDefault(size = 100, sort = "id") Pageable pageable) {
+    @Override
+    public ResponseEntity<PageResponse<HistoricoPacienteDTO>> listarHistoricosPaciente(Pageable pageable) {
         return ResponseEntity.ok(historicoPacienteService.getHistoricos(pageable));
     }
 
-    @PostMapping
-    public ResponseEntity<MensagemSucessoResponse> salvar(@RequestBody @Valid SalvarHistoricoPacienteRequest salvarHistoricoPacienteRequest) {
+    @Override
+    public ResponseEntity<MensagemSucessoResponse> salvarHistoricoPaciente(SalvarHistoricoPacienteRequest salvarHistoricoPacienteRequest) {
         return ResponseEntity.status(HttpStatus.CREATED.value()).body(historicoPacienteService.salvar(salvarHistoricoPacienteRequest));
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<MensagemSucessoResponse> atualizar(@PathVariable Integer id, @RequestBody @Valid AtualizarHistoricoPacienteRequest atualizarHistoricoPacienteRequest) {
+    @Override
+    public ResponseEntity<MensagemSucessoResponse> atualizarHistoricoPaciente(Integer id, AtualizarHistoricoPacienteRequest atualizarHistoricoPacienteRequest) {
         return ResponseEntity.status(HttpStatus.OK.value()).body(historicoPacienteService.atualizar(id, atualizarHistoricoPacienteRequest));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+    @Override
+    public ResponseEntity<Void> deletarHistoricoPaciente(Integer id) {
         historicoPacienteService.deletar(id);
         return ResponseEntity.noContent().build();
     }
