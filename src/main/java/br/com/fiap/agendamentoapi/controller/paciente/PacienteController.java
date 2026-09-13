@@ -6,41 +6,37 @@ import br.com.fiap.agendamentoapi.model.request.paciente.SalvarPacienteRequest;
 import br.com.fiap.agendamentoapi.model.response.page.PageResponse;
 import br.com.fiap.agendamentoapi.model.response.sucesso.MensagemSucessoResponse;
 import br.com.fiap.agendamentoapi.service.paciente.PacienteService;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/paciente")
-@Tag(name = "Paciente", description = "Endpoints relacionados ao gerenciamento de Pacientes")
-public class PacienteController {
+public class PacienteController implements PacienteDocs {
 
     private final PacienteService pacienteService;
 
-    @GetMapping
-    public ResponseEntity<PageResponse<PacienteDTO>> listar(@Parameter(hidden = true) @PageableDefault(size = 100, sort = "id") Pageable pageable) {
+    @Override
+    public ResponseEntity<PageResponse<PacienteDTO>> listarPacientes(Pageable pageable) {
         return ResponseEntity.ok(pacienteService.getPacientes(pageable));
     }
 
-    @PostMapping
-    public ResponseEntity<MensagemSucessoResponse> salvar(@RequestBody @Valid SalvarPacienteRequest salvarPacienteRequest) {
+    @Override
+    public ResponseEntity<MensagemSucessoResponse> salvarPaciente(SalvarPacienteRequest salvarPacienteRequest) {
         return ResponseEntity.status(HttpStatus.CREATED.value()).body(pacienteService.salvar(salvarPacienteRequest));
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<MensagemSucessoResponse> atualizar(@PathVariable Integer id, @RequestBody @Valid AtualizarPacienteRequest atualizarPacienteRequest) {
+    @Override
+    public ResponseEntity<MensagemSucessoResponse> atualizarPaciente(Integer id, AtualizarPacienteRequest atualizarPacienteRequest) {
         return ResponseEntity.status(HttpStatus.OK.value()).body(pacienteService.atualizar(id, atualizarPacienteRequest));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+    @Override
+    public ResponseEntity<Void> deletarPaciente(Integer id) {
         pacienteService.deletar(id);
         return ResponseEntity.noContent().build();
     }

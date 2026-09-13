@@ -6,41 +6,37 @@ import br.com.fiap.agendamentoapi.model.request.recepcionista.SalvarRecepcionist
 import br.com.fiap.agendamentoapi.model.response.page.PageResponse;
 import br.com.fiap.agendamentoapi.model.response.sucesso.MensagemSucessoResponse;
 import br.com.fiap.agendamentoapi.service.recepcionista.RecepcionistaService;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/recepcionista")
-@Tag(name = "Recepcionista", description = "Endpoints relacionados ao gerenciamento de Recepcionistas")
-public class RecepcionistaController {
+public class RecepcionistaController implements RecepcionistaDocs {
 
     private final RecepcionistaService recepcionistaService;
 
-    @GetMapping
-    public ResponseEntity<PageResponse<RecepcionistaDTO>> listar(@Parameter(hidden = true) @PageableDefault(size = 100, sort = "id") Pageable pageable) {
+    @Override
+    public ResponseEntity<PageResponse<RecepcionistaDTO>> listarRecepcionistas(Pageable pageable) {
         return ResponseEntity.ok(recepcionistaService.getRecepcionistas(pageable));
     }
 
-    @PostMapping
-    public ResponseEntity<MensagemSucessoResponse> salvar(@RequestBody @Valid SalvarRecepcionistaRequest salvarRecepcionistaRequest) {
+    @Override
+    public ResponseEntity<MensagemSucessoResponse> salvarRecepcionista(SalvarRecepcionistaRequest salvarRecepcionistaRequest) {
         return ResponseEntity.status(HttpStatus.CREATED.value()).body(recepcionistaService.salvar(salvarRecepcionistaRequest));
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<MensagemSucessoResponse> atualizar(@PathVariable Integer id, @RequestBody @Valid AtualizarRecepcionistaRequest atualizarRecepcionistaRequest) {
+    @Override
+    public ResponseEntity<MensagemSucessoResponse> atualizarRecepcionista(Integer id, AtualizarRecepcionistaRequest atualizarRecepcionistaRequest) {
         return ResponseEntity.status(HttpStatus.OK.value()).body(recepcionistaService.atualizar(id, atualizarRecepcionistaRequest));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+    @Override
+    public ResponseEntity<Void> deletarRecepcionista(Integer id) {
         recepcionistaService.deletar(id);
         return ResponseEntity.noContent().build();
     }

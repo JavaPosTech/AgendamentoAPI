@@ -11,25 +11,25 @@ import java.time.LocalDateTime;
 @Schema(description = "Estrutura genérica para respostas de erro da API")
 public record ErrorResponseDTO(
 
-        @Schema(description = "Código HTTP")
+        @Schema(description = "Código HTTP.", example = "404")
         int status,
 
-        @Schema(description = "Título resumido")
+        @Schema(description = "Título resumido do erro.", example = "Usuário não encontrado!")
         String title,
 
-        @Schema(description = "Endpoint da requisição")
+        @Schema(description = "Endpoint da requisição.", example = "/AgendamentoAPI/v1/medico/99")
         String instance,
 
-        @Schema(description = "URI identificadora do tipo de erro")
+        @Schema(description = "URI identificadora do tipo de erro.", example = "/AgendamentoAPI/problems/usuario-not-found")
         URI type,
 
-        @Schema(description = "Mensagem detalhada")
+        @Schema(description = "Mensagem detalhada.", example = "Médico não encontrado!")
         String detail,
 
-        @Schema(description = "Erros relacionados à requisição")
+        @Schema(description = "Detalhes adicionais, presentes só em alguns erros. Na validação de campos, traz a lista de MethodArgumentNotValidResponseDTO.")
         Object errors,
 
-        @Schema(description = "Data e hora do erro")
+        @Schema(type = "string", format = "dd/MM/yyyy - HH:mm:ss", description = "Data e hora do erro.", example = "12/09/2026 - 14:30:00")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy - HH:mm:ss")
         LocalDateTime timestamp
 

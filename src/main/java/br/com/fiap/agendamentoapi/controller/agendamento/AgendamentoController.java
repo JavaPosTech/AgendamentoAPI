@@ -6,42 +6,38 @@ import br.com.fiap.agendamentoapi.model.request.agendamento.SalvarAgendamentoReq
 import br.com.fiap.agendamentoapi.model.response.page.PageResponse;
 import br.com.fiap.agendamentoapi.model.response.sucesso.MensagemSucessoResponse;
 import br.com.fiap.agendamentoapi.service.agendamento.AgendamentoService;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/agendamento")
-@Tag(name = "Agendamento", description = "Endpoints para realizar agendamentos de consultas")
-public class AgendamentoController {
+public class AgendamentoController implements AgendamentoDocs {
 
     private final AgendamentoService agendamentoService;
 
-    @GetMapping
-    public ResponseEntity<PageResponse<AgendamentoDTO>> listar(@Parameter(hidden = true) @PageableDefault(size = 100, sort = "id") Pageable pageable, @Parameter(hidden = true) Authentication authentication) {
+    @Override
+    public ResponseEntity<PageResponse<AgendamentoDTO>> listarAgendamentos(Pageable pageable, Authentication authentication) {
         return ResponseEntity.ok(agendamentoService.getAgendamentos(pageable, authentication));
     }
 
-    @PostMapping
-    public ResponseEntity<MensagemSucessoResponse> salvar(@RequestBody @Valid SalvarAgendamentoRequest salvarAgendamentoRequest) {
+    @Override
+    public ResponseEntity<MensagemSucessoResponse> salvarAgendamento(SalvarAgendamentoRequest salvarAgendamentoRequest) {
         return ResponseEntity.status(HttpStatus.CREATED.value()).body(agendamentoService.salvar(salvarAgendamentoRequest));
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<MensagemSucessoResponse> atualizar(@PathVariable Integer id, @RequestBody @Valid AtualizarAgendamentoRequest atualizarAgendamentoRequest) {
+    @Override
+    public ResponseEntity<MensagemSucessoResponse> atualizarAgendamento(Integer id, AtualizarAgendamentoRequest atualizarAgendamentoRequest) {
         return ResponseEntity.ok().body(agendamentoService.atualizar(id, atualizarAgendamentoRequest));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> cancelar(@PathVariable Integer id) {
+    @Override
+    public ResponseEntity<Void> cancelarAgendamento(Integer id) {
         agendamentoService.cancelar(id);
         return ResponseEntity.noContent().build();
     }
