@@ -22,8 +22,9 @@ public interface AuthDocs {
     @Operation(
             summary = "Realiza o login",
             description = """
-                    Autentica o usuário com login e senha e devolve um token JWT, válido por 24 horas \
-                    por padrão. O perfil do usuário vai dentro do token e define quais rotas ele acessa.
+                    Autentica o usuário com login e senha e devolve um token JWT, válido por 2 horas \
+                    por padrão. O campo expires_in informa essa validade em segundos, contada a partir \
+                    da emissão. O perfil do usuário vai dentro do token e define quais rotas ele acessa.
 
                     Para usar o token nesta página, clique em **Authorize** e cole apenas o valor do \
                     campo token. Fora do Swagger, envie o cabeçalho Authorization: Bearer seguido do token.

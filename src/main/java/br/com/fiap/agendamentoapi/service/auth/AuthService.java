@@ -6,6 +6,7 @@ import br.com.fiap.agendamentoapi.exceptions.UsuarioInativoException;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.model.entity.usuario.Usuario;
 import br.com.fiap.agendamentoapi.model.request.auth.LoginRequest;
+import br.com.fiap.agendamentoapi.model.response.auth.TokenResponse;
 import br.com.fiap.agendamentoapi.repository.usuario.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,7 @@ public class AuthService {
     private final TokenService tokenService;
 
     @Transactional(readOnly = true)
-    public String login(LoginRequest loginRequest) {
+    public TokenResponse login(LoginRequest loginRequest) {
         log.info("Autenticando Usuário: {}", loginRequest.login());
 
         var usuario = usuarioRepository.findByLogin(loginRequest.login())
@@ -40,7 +41,7 @@ public class AuthService {
         }
 
         log.info("Usuário autenticado com sucesso: {}", loginRequest.login());
-        return tokenService.gerarToken(usuario);
+        return new TokenResponse(tokenService.gerarToken(usuario), tokenService.getExpiracaoEmSegundos());
     }
 
     private boolean estaAtivo(Usuario usuario) {

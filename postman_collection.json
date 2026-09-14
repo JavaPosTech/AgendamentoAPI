@@ -1,13 +1,13 @@
 {
   "info": {
     "name": "AgendamentoAPI",
-    "description": "API REST de agendamento de consultas médicas da FIAP (Fase 3).\n\n## Como usar\n\n1. Suba o PostgreSQL e a API (perfil `dev` responde em `http://localhost:9017/AgendamentoAPI`, perfil `prod` em `9027`).\n2. Preencha a variável `senhaSeed` com a senha dos usuários do seed.\n3. Rode a pasta **Autenticação**. Cada login grava o token do perfil numa variável.\n4. Rode as demais pastas. Cada requisição já usa o token de um perfil com permissão.\n\n## Observações\n\n* Todas as rotas exigem `Authorization: Bearer <token>`, exceto o login e a documentação.\n* A paginação começa na página 1.\n* O Jackson está em modo estrito: um campo desconhecido no JSON responde 400.\n* Datas usam `dd/MM/yyyy` e data com hora usa `dd/MM/yyyy - HH:mm:ss`.\n* As rotas de exclusão apontam para os registros criados pelas próprias requisições de cadastro, então o seed fica intacto num banco recém criado.\n* Rodar os cadastros duas vezes responde 409, porque login, CRM, COREN, CPF e e-mail são únicos.\n* Cada requisição tem exemplos salvos de sucesso e de erro.\n\n## HistoricoAPI (GraphQL)\n\nA pasta **HistoricoAPI (GraphQL)** traz a consulta do microsserviço irmão, que usa a variável `historicoBaseUrl` e não exige token. Ela lê o mesmo banco, então o paciente, o histórico e as consultas criados aqui aparecem na query.",
+    "description": "API REST de agendamento de consultas médicas da FIAP (Fase 3).\n\n## Como usar\n\n1. Suba o PostgreSQL e a API (perfil `dev` responde em `http://localhost:9017/AgendamentoAPI`, perfil `prod` em `9027`).\n2. Os usuários do seed (`V1.1__Inserts.sql`) usam a senha `Teste@123`, que já vem preenchida nos logins.\n3. Rode a pasta **Autenticação**. Cada login grava o token do perfil numa variável.\n4. Rode as demais pastas. Cada requisição já usa o token de um perfil com permissão.\n\n## Observações\n\n* Todas as rotas exigem `Authorization: Bearer <token>`, exceto o login e a documentação.\n* A paginação começa na página 1.\n* O Jackson está em modo estrito: um campo desconhecido no JSON responde 400.\n* Datas usam `dd/MM/yyyy` e data com hora usa `dd/MM/yyyy - HH:mm:ss`.\n* As rotas de exclusão apontam para os registros criados pelas próprias requisições de cadastro, então o seed fica intacto num banco recém criado.\n* Rodar os cadastros duas vezes responde 409, porque login, CRM, COREN, CPF e e-mail são únicos.\n* Cada requisição tem exemplos salvos de sucesso e de erro.\n\n## HistoricoAPI (GraphQL)\n\nA pasta **HistoricoAPI (GraphQL)** traz a consulta do microsserviço irmão, que usa a variável `historicoBaseUrl` e não exige token. Ela lê o mesmo banco, então o paciente, o histórico e as consultas criados aqui aparecem na query.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
       "name": "Autenticação",
-      "description": "Rode estas requisições primeiro. Cada login grava o token do perfil numa variável da collection.\n\nTodos os usuários do seed (`V1.1__Inserts.sql`) compartilham a mesma senha. Preencha a variável `senhaSeed` com ela antes de começar.",
+      "description": "Rode estas requisições primeiro. Cada login grava o token do perfil numa variável da collection.\n\nOs logins usam os usuários do seed (`V1.1__Inserts.sql`), todos com a senha `Teste@123`:\n\n| Perfil | Login |\n| --- | --- |\n| ADMINISTRADOR | `admin` |\n| MEDICO | `joao.silva`, `ana.oliveira` |\n| ENFERMEIRO | `carlos.santos`, `mariana.costa` |\n| RECEPCIONISTA | `fernanda.lima` |\n| PACIENTE | `pedro.almeida`, `juliana.rocha`, `lucas.ferreira` |",
       "item": [
         {
           "name": "Login ADMINISTRADOR",
@@ -53,7 +53,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"login\": \"{{loginAdministrador}}\",\n  \"senha\": \"{{senhaSeed}}\"\n}",
+              "raw": "{\n  \"login\": \"admin\",\n  \"senha\": \"Teste@123\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -88,7 +88,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"login\": \"{{loginAdministrador}}\",\n  \"senha\": \"{{senhaSeed}}\"\n}",
+                  "raw": "{\n  \"login\": \"admin\",\n  \"senha\": \"Teste@123\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -106,7 +106,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiJ9.assinatura\",\n  \"tipo\": \"Bearer\"\n}"
+              "body": "{\n  \"type\": \"Bearer\",\n  \"expires_in\": 7200,\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiJ9.assinatura\"\n}"
             },
             {
               "name": "400 - Senha incorreta",
@@ -180,7 +180,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"login\": \"\",\n  \"senha\": \"Senha@123\"\n}",
+                  "raw": "{\n  \"login\": \"\",\n  \"senha\": \"Teste@123\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -272,7 +272,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"login\": \"inexistente\",\n  \"senha\": \"Senha@123\"\n}",
+                  "raw": "{\n  \"login\": \"inexistente\",\n  \"senha\": \"Teste@123\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -338,7 +338,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"login\": \"{{loginMedico}}\",\n  \"senha\": \"{{senhaSeed}}\"\n}",
+              "raw": "{\n  \"login\": \"joao.silva\",\n  \"senha\": \"Teste@123\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -373,7 +373,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"login\": \"{{loginMedico}}\",\n  \"senha\": \"{{senhaSeed}}\"\n}",
+                  "raw": "{\n  \"login\": \"joao.silva\",\n  \"senha\": \"Teste@123\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -391,7 +391,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiJ9.assinatura\",\n  \"tipo\": \"Bearer\"\n}"
+              "body": "{\n  \"type\": \"Bearer\",\n  \"expires_in\": 7200,\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiJ9.assinatura\"\n}"
             }
           ]
         },
@@ -439,7 +439,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"login\": \"{{loginEnfermeiro}}\",\n  \"senha\": \"{{senhaSeed}}\"\n}",
+              "raw": "{\n  \"login\": \"carlos.santos\",\n  \"senha\": \"Teste@123\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -474,7 +474,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"login\": \"{{loginEnfermeiro}}\",\n  \"senha\": \"{{senhaSeed}}\"\n}",
+                  "raw": "{\n  \"login\": \"carlos.santos\",\n  \"senha\": \"Teste@123\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -492,7 +492,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiJ9.assinatura\",\n  \"tipo\": \"Bearer\"\n}"
+              "body": "{\n  \"type\": \"Bearer\",\n  \"expires_in\": 7200,\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiJ9.assinatura\"\n}"
             }
           ]
         },
@@ -540,7 +540,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"login\": \"{{loginRecepcionista}}\",\n  \"senha\": \"{{senhaSeed}}\"\n}",
+              "raw": "{\n  \"login\": \"fernanda.lima\",\n  \"senha\": \"Teste@123\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -575,7 +575,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"login\": \"{{loginRecepcionista}}\",\n  \"senha\": \"{{senhaSeed}}\"\n}",
+                  "raw": "{\n  \"login\": \"fernanda.lima\",\n  \"senha\": \"Teste@123\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -593,7 +593,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiJ9.assinatura\",\n  \"tipo\": \"Bearer\"\n}"
+              "body": "{\n  \"type\": \"Bearer\",\n  \"expires_in\": 7200,\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiJ9.assinatura\"\n}"
             }
           ]
         },
@@ -641,7 +641,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"login\": \"{{loginPaciente}}\",\n  \"senha\": \"{{senhaSeed}}\"\n}",
+              "raw": "{\n  \"login\": \"pedro.almeida\",\n  \"senha\": \"Teste@123\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -676,7 +676,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"login\": \"{{loginPaciente}}\",\n  \"senha\": \"{{senhaSeed}}\"\n}",
+                  "raw": "{\n  \"login\": \"pedro.almeida\",\n  \"senha\": \"Teste@123\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -694,7 +694,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiJ9.assinatura\",\n  \"tipo\": \"Bearer\"\n}"
+              "body": "{\n  \"type\": \"Bearer\",\n  \"expires_in\": 7200,\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiJ9.assinatura\"\n}"
             }
           ]
         }
@@ -8257,37 +8257,6 @@
       "value": "http://localhost:9028/HistoricoAPI",
       "type": "string",
       "description": "URL base da HistoricoAPI. 9028 é a porta publicada pelo Docker. No perfil dev ela sobe em 9017, a mesma porta da AgendamentoAPI."
-    },
-    {
-      "key": "senhaSeed",
-      "value": "",
-      "type": "string",
-      "description": "Senha em texto puro dos usuários do seed. Preencha antes de rodar os logins."
-    },
-    {
-      "key": "loginAdministrador",
-      "value": "admin",
-      "type": "string"
-    },
-    {
-      "key": "loginMedico",
-      "value": "joao.silva",
-      "type": "string"
-    },
-    {
-      "key": "loginEnfermeiro",
-      "value": "carlos.santos",
-      "type": "string"
-    },
-    {
-      "key": "loginRecepcionista",
-      "value": "fernanda.lima",
-      "type": "string"
-    },
-    {
-      "key": "loginPaciente",
-      "value": "pedro.almeida",
-      "type": "string"
     },
     {
       "key": "tokenAdministrador",

@@ -184,7 +184,7 @@ $ Exemplo: fiap@2026
 $ Exemplo: uma string aleatória com pelo menos 32 caracteres
 
 # JWT_EXPIRATION_MS
-$ Exemplo: 86400000 (24 horas)
+$ Exemplo: 7200000 (2 horas)
 ```
 
 As variáveis `DATABASE_*` e `RABBITMQ_*` são utilizadas tanto para **criar** os containers do PostgreSQL e do RabbitMQ quanto para a API se **conectar** a eles, de modo que as credenciais não têm como divergir. Se `DATABASE_PASSWORD`, `RABBITMQ_PASSWORD` ou `JWT_SECRET` não estiverem preenchidas, o Compose interrompe a execução com uma mensagem explícita, em vez de subir com valores em branco.
@@ -226,8 +226,9 @@ A resposta traz o token que deve ser enviado no header `Authorization` das próx
 
 ```json
 {
-  "token": "eyJhbGciOiJIUzUxMiJ9...",
-  "tipo": "Bearer"
+  "type": "Bearer",
+  "expires_in": 7200,
+  "token": "eyJhbGciOiJIUzUxMiJ9..."
 }
 ```
 
@@ -235,7 +236,7 @@ A resposta traz o token que deve ser enviado no header `Authorization` das próx
 Authorization: Bearer eyJhbGciOiJIUzUxMiJ9...
 ```
 
-O token expira em 24 horas (configurável via `JWT_EXPIRATION_MS`). Após expirar, é necessário realizar login novamente.
+O token expira em 2 horas (configurável via `JWT_EXPIRATION_MS`). O campo `expires_in` informa essa validade em segundos, contada a partir da emissão. Após expirar, é necessário realizar login novamente.
 
 > ⚠️ **Não há autocadastro:** todo cadastro (`POST`) exige token.
 > - **Médico, Enfermeiro e Recepcionista:** criar, atualizar e excluir → **só `ADMINISTRADOR`**; listar → todos os perfis **exceto `PACIENTE`**.

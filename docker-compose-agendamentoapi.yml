@@ -24,7 +24,7 @@ services:
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?defina RABBITMQ_PASSWORD no arquivo .env}
 
       JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no arquivo .env}
-      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-3600000}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-7200000}
 
     volumes:
       - ./logs:/app/logs

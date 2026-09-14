@@ -31,7 +31,7 @@ public class SwaggerConfig {
                                 3. Clique em **Authorize** e cole o token.
 
                                 A partir daí todas as chamadas desta página seguem autenticadas. O token \
-                                expira em 24 horas por padrão.
+                                expira em 2 horas por padrão.
 
                                 ### Perfis de acesso
 

@@ -5,6 +5,7 @@ import br.com.fiap.agendamentoapi.exceptions.UsuarioInativoException;
 import br.com.fiap.agendamentoapi.exceptions.UsuarioNaoEncontradoException;
 import br.com.fiap.agendamentoapi.exceptions.handler.GlobalExceptionHandler;
 import br.com.fiap.agendamentoapi.model.request.auth.LoginRequest;
+import br.com.fiap.agendamentoapi.model.response.auth.TokenResponse;
 import br.com.fiap.agendamentoapi.service.auth.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import java.nio.file.Paths;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -60,14 +62,13 @@ class AuthControllerTest {
 
     @Test
     void loginTest() throws Exception {
-        when(authService.login(any(LoginRequest.class))).thenReturn("token-jwt-teste");
+        when(authService.login(any(LoginRequest.class))).thenReturn(new TokenResponse("token-jwt-teste", 7200L));
 
         mockMvc.perform(post("/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginRequest))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("token-jwt-teste"))
-                .andExpect(jsonPath("$.tipo").value("Bearer"));
+                .andExpect(content().string("{\"type\":\"Bearer\",\"expires_in\":7200,\"token\":\"token-jwt-teste\"}"));
     }
 
     @Test

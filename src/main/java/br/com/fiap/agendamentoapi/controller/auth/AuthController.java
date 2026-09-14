@@ -17,6 +17,6 @@ public class AuthController implements AuthDocs {
 
     @Override
     public ResponseEntity<TokenResponse> login(LoginRequest loginRequest) {
-        return ResponseEntity.ok(new TokenResponse(authService.login(loginRequest)));
+        return ResponseEntity.ok(authService.login(loginRequest));
     }
 }

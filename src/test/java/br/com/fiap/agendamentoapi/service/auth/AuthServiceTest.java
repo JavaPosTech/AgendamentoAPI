@@ -55,12 +55,17 @@ class AuthServiceTest {
         when(tokenService.gerarToken(usuario))
                 .thenReturn("token-jwt-teste");
 
-        var token = Assertions.assertDoesNotThrow(
+        when(tokenService.getExpiracaoEmSegundos())
+                .thenReturn(7200L);
+
+        var response = Assertions.assertDoesNotThrow(
                 () -> authService.login(request)
         );
 
-        Assertions.assertNotNull(token);
-        Assertions.assertEquals("token-jwt-teste", token);
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals("token-jwt-teste", response.token());
+        Assertions.assertEquals("Bearer", response.tipo());
+        Assertions.assertEquals(7200L, response.expiresIn());
 
         verify(usuarioRepository).findByLogin("usuario.teste");
 

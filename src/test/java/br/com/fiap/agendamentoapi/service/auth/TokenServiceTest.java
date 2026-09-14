@@ -43,6 +43,11 @@ class TokenServiceTest {
     }
 
     @Test
+    void getExpiracaoEmSegundosTest() {
+        Assertions.assertEquals(60L, tokenService.getExpiracaoEmSegundos());
+    }
+
+    @Test
     void validarTokenInvalidoTest() {
         Assertions.assertThrows(JwtException.class, () -> tokenService.validarToken("token-invalido"));
     }

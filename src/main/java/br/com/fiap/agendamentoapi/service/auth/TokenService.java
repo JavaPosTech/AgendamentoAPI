@@ -14,7 +14,7 @@ import java.util.Date;
 @Component
 public class TokenService {
 
-    @Value("${JWT_EXPIRATION_MS:86400000}")
+    @Value("${JWT_EXPIRATION_MS:7200000}")
     private long expirationMs;
 
     private static final String ISSUER = "agendamento-api";
@@ -33,6 +33,10 @@ public class TokenService {
                 .expiration(Date.from(agora.plusMillis(expirationMs)))
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    public long getExpiracaoEmSegundos() {
+        return expirationMs / 1000;
     }
 
     public String validarToken(String token) throws JwtException {
