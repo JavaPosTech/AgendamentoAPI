@@ -10,7 +10,7 @@ services:
 
       POSTGRES_DB: ${DATABASE_NAME:-postgres}
       POSTGRES_USER: ${DATABASE_USER:-postgres}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?defina DATABASE_PASSWORD no arquivo .env}
 
     ports:
       - "8745:5432"
@@ -37,7 +37,7 @@ services:
       TZ: America/Sao_Paulo
 
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-fiap}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?defina RABBITMQ_PASSWORD no arquivo .env}
 
     ports:
       - "5672:5672"
