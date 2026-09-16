@@ -38,7 +38,4 @@ out/
 
 .run/
 
-.env
-.env.dev
-
 logs/
